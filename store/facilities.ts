@@ -11,9 +11,8 @@ export const useFacilitiesStore = defineStore("facilities", {
   }),
   actions: {
     async search(filters: Record<string, any>) {
-
       console.log(filters);
-      
+
       this.loading = true;
       this.results = [];
       this.total = 0;

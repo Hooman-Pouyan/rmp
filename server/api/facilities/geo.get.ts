@@ -2,13 +2,18 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { StateFacilities } from "~/core/types/facility";
+// import { useFacilitiesStore } from "~/store/facilities";
 
 const ROOT = join(process.cwd(), "data/facilities/by-state");
+
+// const store = useFacilitiesStore();
 
 export default defineEventHandler(() => {
   const states = readdirSync(ROOT).map(
     (f) => JSON.parse(readFileSync(join(ROOT, f), "utf8")) as StateFacilities
   );
+
+  // console.log(store.results);
 
   const features = states.flatMap((s) =>
     s.counties.flatMap((c) =>

@@ -116,9 +116,9 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
       </button>
     </div>
   </section>
-
-    <ArcFacilitiesMap />
-
+  
+    <ArcFacilitiesMap :facilities="store.results" />
+  
   <!-- Results -->
   <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">
     <ResultsTable :rows="store.results" />

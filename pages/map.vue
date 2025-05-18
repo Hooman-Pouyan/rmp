@@ -5,7 +5,7 @@ import ArcFacilitiesMap from '~/components/ArcFacilitiesMap.vue'
 </script>
 
 <template>
-    <ArcFacilitiesMap />
+    <!-- <ArcFacilitiesMap /> -->
  </template>
 
 
