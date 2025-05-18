@@ -5,6 +5,7 @@ import FacilitySection from '~/components/search/FacilitySection.vue'
 import LocationSection from '~/components/search/LocationSection.vue'
 import ProcessSection from '~/components/search/ProcessSection.vue'
 import ResultsTable from '~/components/search/ResultsTable.vue'
+import ArcFacilitiesMap from '~/components/ArcFacilitiesMap.vue'
 
 /**
  * Entire filter object driving all sections
@@ -80,7 +81,7 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
         The Risk Management Plan (RMP) rule implements Section 112(r) of the 1990 Clean Air Act …
       </p>
     </header>
-
+  
     <section>
     <!-- Accordion of filter sections -->
     <UsaAccordion bordered class="margin-bottom-2 usa-accordion--multiselectable">
@@ -115,6 +116,8 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
       </button>
     </div>
   </section>
+
+    <ArcFacilitiesMap />
 
   <!-- Results -->
   <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">

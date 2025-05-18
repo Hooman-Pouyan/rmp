@@ -24,8 +24,16 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+plugins: [
+    { src: '~/plugins/arcgis.client.ts', mode: 'client' }
+  ],
+  runtimeConfig: {
+    public: {
+      esriApiKey: process.env.NUXT_PUBLIC_ESRI_API_KEY || ''
+    }
+  },
   build: {
-    transpile: ['vue-uswds']
+    transpile: ["vue-uswds"],
   },
   modules: [
     "@pinia/nuxt",
