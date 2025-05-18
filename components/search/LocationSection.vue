@@ -13,7 +13,9 @@ const states   = ref<{abbr:string;name:string}[]>([])
 const counties = ref<{fips:string;name:string}[]>([])
 
 onMounted(async () => {
-  const res = await fetch('/data/facilities/states.json')
+  const res = await fetch('/api/states')
+  console.log({res});
+  
   states.value = await res.json()
 })
 
@@ -23,7 +25,7 @@ watch(() => f.state, async (abbr) => {
     set('county', '')
     return
   }
-  const res = await fetch(`/data/facilities/by-state/${abbr}.json`)
+  const res = await fetch(`/api/states?abbr=${abbr || ''}`)
   const json = await res.json()
   counties.value = json.counties
   set('county', '')
@@ -34,9 +36,44 @@ watch(() => f.state, async (abbr) => {
   <fieldset class="usa-fieldset margin-bottom-4">
     <legend class="usa-legend margin-bottom-2">Geographic Location</legend>
 
-    <div class="grid-row grid-gap-2">
+    <div class="grid grid-cols-2">
+
+<!-- Address -->
+<div class="col-span-1">
+  <label class="usa-label" for="address">Address</label>
+  <input id="address" class="usa-input"
+         :value="f.address"
+         @input="e=>set('address',(e.target as HTMLInputElement).value)" />
+
+  <div class="margin-top-1">
+    <label class="usa-radio margin-right-2">
+      <input class="usa-radio__input" type="radio" name="addrMatch"
+             :checked="f.exactAddress" @change="set('exactAddress',true)">
+      <span class="usa-radio__label">Exact</span>
+    </label>
+    <label class="usa-radio">
+      <input class="usa-radio__input" type="radio" name="addrMatch"
+             :checked="!f.exactAddress" @change="set('exactAddress',false)">
+      <span class="usa-radio__label">Contains</span>
+    </label>
+  </div>
+</div>
+
+            <!-- City -->
+      <div class="col-span-1">
+        <label class="usa-label" for="city">City</label>
+        <input
+          id="city"
+          class="usa-input"
+          type="text"
+          :value="f.city"
+          @input="e => set('city', (e.target as HTMLInputElement).value)"
+        />
+      </div>
+
+
       <!-- State -->
-      <div class="tablet:grid-col-4">
+      <div class="col-span-1">
         <label class="usa-label" for="state">State</label>
         <select
           id="state"
@@ -52,7 +89,7 @@ watch(() => f.state, async (abbr) => {
       </div>
 
       <!-- County -->
-      <div class="tablet:grid-col-4">
+      <div class="col-span-1">
         <label class="usa-label" for="county">County</label>
         <select
           id="county"
@@ -68,17 +105,19 @@ watch(() => f.state, async (abbr) => {
         </select>
       </div>
 
-      <!-- City -->
-      <div class="tablet:grid-col-4">
-        <label class="usa-label" for="city">City</label>
+      <!-- zip -->
+      <div class="col-span-1">
+        <label class="usa-label" for="zip">zip</label>
         <input
-          id="city"
+          id="zip"
           class="usa-input"
           type="text"
-          :value="f.city"
-          @input="e => set('city', (e.target as HTMLInputElement).value)"
+          :value="f.zip"
+          @input="e => set('zip', (e.target as HTMLInputElement).value)"
         />
       </div>
+
+
     </div>
   </fieldset>
 </template>

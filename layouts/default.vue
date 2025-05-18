@@ -17,7 +17,7 @@ import AppFooter from './components/AppFooter.vue'
 
   <AppHeader />
 
-  <main id="main-content" class="usa-section bg-base-lightest">
+  <main id="main-content" class="bg-base-lightest px-5">
     <slot />
   </main>
 

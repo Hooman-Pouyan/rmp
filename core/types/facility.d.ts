@@ -12,7 +12,7 @@ export interface FacilityLite {
   EPAFacilityID: string;
   name: string;
   city: string;
-  state: string;
+  state: { name: string; abbr: string };
   zip: string;
   address?: string; // Optional because it may not always exist
   names_prev?: string[]; // Optional array of previous names

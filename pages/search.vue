@@ -53,6 +53,7 @@ function clearFilters() {
     else if (Array.isArray(val)) (filters[k as keyof typeof filters] as any) = []
     else filters[k as keyof typeof filters] = '' as any
   })
+  runSearch()
 }
 
 /** Run the search API with exactly these filters */
@@ -72,17 +73,20 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
 </script>
 
 <template>
-  <section class="usa-card usa-card--bordered margin-y-4">
-    <header class="usa-card__header">
-      <h1 class="usa-card__heading">Risk Management Plan</h1>
-      <p class="usa-intro">
+  <section class="usa-card usa-card--bordered">
+    <header class="usa-card__header !px-0 ">
+      <h1 class="usa-card__heading !text-3xl font-bold">Risk Management Plan</h1>
+      <p class="!text-lg !font-normal">
         The Risk Management Plan (RMP) rule implements Section 112(r) of the 1990 Clean Air Act …
       </p>
     </header>
 
+    <section>
     <!-- Accordion of filter sections -->
-    <UsaAccordion bordered class="margin-bottom-2">
+    <UsaAccordion bordered class="margin-bottom-2 usa-accordion--multiselectable">
+      
       <UsaAccordionItem open id="facility">
+
         <template #title>Facility</template>
         <FacilitySection v-model="filtersModel"  @update:modelValue="onFiltersUpdate" />
       </UsaAccordionItem>
@@ -98,6 +102,9 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
       </UsaAccordionItem>
     </UsaAccordion>
 
+    </section>
+
+    <section class="px-5 m-3">
     <!-- Clear + Search -->
     <div class="display-flex flex-justify-end gap-2">
       <button class="usa-button usa-button--outline" @click="clearFilters">
@@ -110,9 +117,11 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
   </section>
 
   <!-- Results -->
-  <section class="margin-y-4">
+  <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">
     <ResultsTable :rows="store.results" />
   </section>
+  </section>
+
 </template>
 
 <style scoped>

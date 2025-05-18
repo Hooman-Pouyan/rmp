@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import Database from 'better-sqlite3'
+import { readFileSync } from 'node:fs';
 // import type { StateFacilities } from '~/types/facility'
 
 /* ---------- JSON helpers ---------- */
@@ -10,7 +11,20 @@ export function readState(abbr: string): any {
 }
 
 export function readFacility(id: string) {
-  return require(join(DATA_ROOT, 'detail', `${id}.json`))
+  const path = join(
+    process.cwd(),
+    "data",
+    "facilities",
+    "detail",
+    `${id}.json`
+  );
+  try {
+    const json = readFileSync(path, "utf-8");
+    return JSON.parse(json);
+  } catch (error) {
+    console.error(`Error loading facility ${id}:`, error);
+    return null;
+  }
 }
 
 /* ---------- SQLite helper (for future) ---------- */

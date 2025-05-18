@@ -4,7 +4,7 @@ const props = defineProps<{ rows: FacilityLite[] }>()
 </script>
 
 <template>
-  <table class="usa-table usa-table--borderless usa-table--striped" v-if="props.rows.length">
+  <table class="usa-table !w-full usa-table--borderless usa-table--striped" v-if="props.rows.length">
     <thead class="usa-table__head">
       <tr class="usa-table__row">
         <th class="usa-table__header">Facility</th>
@@ -21,7 +21,7 @@ const props = defineProps<{ rows: FacilityLite[] }>()
           <NuxtLink :to="`/facility/${r.EPAFacilityID}`">{{ r.name }}</NuxtLink>
         </td>
         <td class="usa-table__cell">{{ r.city }}</td>
-        <td class="usa-table__cell">{{ r.state }}</td>
+        <td class="usa-table__cell">{{ r.state.name }}</td>
         <td class="usa-table__cell">{{ r.EPAFacilityID }}</td>
         <td class="usa-table__cell">{{ r.sub_last?.date_val || '—' }}</td>
         <td class="usa-table__cell">{{ r.sub_last?.num_accidents ?? '—' }}</td>
