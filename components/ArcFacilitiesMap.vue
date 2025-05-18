@@ -1,76 +1,80 @@
-<!-- components/ArcFacilitiesMap.vue -->
 <template>
-  <div ref="mapDiv" style="width:100%; height:600px"></div>
+  <!-- wraps in client-only so SSR never even tries to render it -->
+  <client-only>
+    <div ref="mapDiv" style="width:100%; height:600px;"></div>
+  </client-only>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import type { FacilityLite } from '~/core/types/facility'
 
-// Receive the array of filtered facilities (from your store)
+// receive the filtered facilities array
 const props = defineProps<{ facilities: FacilityLite[] }>()
 
+// a ref to our <div>
 const mapDiv = ref<HTMLDivElement>()
+
+// placeholders for view & layer
 let view: __esri.MapView
 let layer: __esri.GeoJSONLayer
 
-/**
- * Apply the filter by EPA ID, then zoom/center to the result extent.
- */
-async function applyFilter() {
-  if (!layer || !view) return
+async function initMap() {
+  // only run in browser
+  if (!process.client) return
 
-  // Build an IN() expression of EPAFacilityID strings
-  const ids = props.facilities.map(f => f.EPAFacilityID)
-  const expr = ids.length
-    ? `id IN (${ids.map(id => `'${id}'`).join(',')})`
-    : ''  // empty => show all
-
-  layer.definitionExpression = expr
-
-  // Wait until the view is ready
-  await view.when()
-
-  // Query the extent of the filtered features
-  // If expr is empty, we use "1=1" to get full extent
-  const { extent } = await layer.queryExtent({ where: expr || '1=1' })
-
-  // Zoom/center to that extent with a little padding
-  view.goTo({ target: extent, padding: 50 })
-}
-
-onMounted(async () => {
-  // Dynamically import ArcGIS modules in browser-only
+  // dynamic imports
   const [
-    { default: Map },
-    { default: MapView },
-    { default: GeoJSONLayer }
+    EsriConfig,
+    Basemap,
+    BasemapStyle,
+    Map,
+    MapView,
+    GeoJSONLayer
   ] = await Promise.all([
-    import('@arcgis/core/Map'),
-    import('@arcgis/core/views/MapView'),
-    import('@arcgis/core/layers/GeoJSONLayer')
+    import('@arcgis/core/config.js'),
+    import('@arcgis/core/Basemap.js'),
+    import('@arcgis/core/support/BasemapStyle.js'),
+    import('@arcgis/core/Map.js'),
+    import('@arcgis/core/views/MapView.js'),
+    import('@arcgis/core/layers/GeoJSONLayer.js')
   ])
 
-  // 1️⃣ Create the map & view
-  const map = new Map({ basemap: 'arcgis-topographic' })
-  view = new MapView({
+  // sets API key
+  EsriConfig.default.apiKey = process.env.NUXT_PUBLIC_ESRI_API_KEY
+
+  // builds a navigation basemap style
+  const basemap = new Basemap.default({
+    style: new BasemapStyle.default({
+      id: 'arcgis/navigation',
+      places: 'attributed'
+    })
+  })
+
+  // create the map + view
+  const map = new Map.default({ basemap })
+  view = new MapView.default({
     container: mapDiv.value!,
     map,
     center: [-96, 37.8],
     zoom: 4
   })
 
-  // 2️⃣ Create a GeoJSONLayer that loads all facilities
-  layer = new GeoJSONLayer({
-    url: '/api/facilities/geo',
+  // loads facilities GeoJSON and clusters it
+  layer = new GeoJSONLayer.default({
+    url: '/api/facilities/geo',     
     objectIdField: 'id',
     popupTemplate: {
       title: '{name}',
-      content: event => {
+      content: (event: any) => {
         const p = event.graphic.attributes as any
         return `
+          <strong>${p.name}</strong><br>
           ${p.city}, ${p.state}<br>
-          EPA ID: <a href="/facility/${p.id}">${p.id}</a><br>
+          EPA ID:
+            <a href="/facility/${p.id}">
+              ${p.id}
+            </a><br>
           Last RMP: ${p.lastDate}<br>
           Accidents: ${p.accidents}
         `
@@ -103,13 +107,30 @@ onMounted(async () => {
     }
   })
 
-  // 3️⃣ Add it to the map
   map.add(layer)
 
-  // 4️⃣ Initial filter/apply (shows all + zooms to full extent)
+  // once map & layer are ready, apply initial filter + zoom
+  await view.when()
   applyFilter()
-})
+}
 
-// 5️⃣ Re-apply whenever your search results change
+// builds the SQL WHERE for your EPA IDs, re-queries extent, zooms
+async function applyFilter() {
+  if (!layer || !view) return
+
+  const ids = props.facilities.map((f) => f.EPAFacilityID)
+  layer.definitionExpression = ids.length
+    ? `id IN (${ids.map((id) => `'${id}'`).join(',')})`
+    : ''
+
+  await view.when()
+  const { extent } = await layer.queryExtent({ where: layer.definitionExpression || '1=1' })
+  view.goTo({ target: extent, padding: 50 })
+}
+
+// only run once, on client
+onMounted(initMap)
+
+// re-apply whenever parent’s filtered facilities change
 watch(() => props.facilities, applyFilter, { deep: true })
 </script>

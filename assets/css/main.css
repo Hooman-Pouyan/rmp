@@ -3,6 +3,13 @@
 @import "https://js.arcgis.com/calcite-components/3.0.3/calcite.css";
 @import "https://js.arcgis.com/4.32/@arcgis/core/assets/esri/themes/light/main.css";
 @import "https://js.arcgis.com/map-components/4.32/arcgis-map-components.css";
+@import url("https://js.arcgis.com/4.32/calcite-components/3.0.3/calcite.css");
+
+/* ArcGIS Core  */
+@import url("https://js.arcgis.com/4.32/4.32/@arcgis/core/assets/esri/themes/dark/main.css");
+
+/* Map Components */
+@import "https://js.arcgis.com/4.32/map-components/4.32/arcgis-map-components.css";
 
 html,
 body {
@@ -11,7 +18,11 @@ body {
 }
 
 #viewDiv,
-arcgis-map {
-      display: block;
-      height: 100%;
+arcgis-map {}
+
+calcite-list,
+calcite-button {
+      --calcite-color-text-1: #3c83b7;
+      --calcite-color-text-2: #3c83b7;
+      --calcite-color-text-3: #3c83b7;
 }
