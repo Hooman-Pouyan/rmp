@@ -1,54 +1,150 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { FacilityLite } from '~/core/types/facility'
-const props = defineProps<{ rows: FacilityLite[] }>()
+
+const props = defineProps<{
+  rows: FacilityLite[]
+  total: number
+  page: number
+  perPage: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'page-changed', newPage: number): void
+}>()
+
+// total number of pages
+const totalPages = computed(() =>
+  Math.ceil(props.total / props.perPage)
+)
+
+// how many numbered buttons to show in the middle
+const windowSize = 5
+
+// compute the sliding window of page numbers
+const visiblePages = computed(() => {
+  const tp = totalPages.value
+  const half = Math.floor(windowSize / 2)
+  let start = Math.max(1, props.page - half)
+  let end = Math.min(tp, props.page + half)
+
+  // if we’re at the very start or end, extend the window
+  if (props.page <= half) {
+    end = Math.min(tp, windowSize)
+  }
+  if (props.page + half > tp) {
+    start = Math.max(1, tp - windowSize + 1)
+  }
+  const pages = []
+  for (let p = start; p <= end; p++) pages.push(p)
+  return pages
+})
+
+function goto(p: number) {
+  if (p < 1 || p > totalPages.value || p === props.page) return
+  emit('page-changed', p)
+}
 </script>
 
 <template>
-  <table class="usa-table !w-full usa-table--borderless usa-table--striped" v-if="props.rows.length">
-    <thead class="usa-table__head">
-      <tr class="usa-table__row">
-        <th class="usa-table__header">EPA ID</th>
-        <th class="usa-table__header">Facility</th>
-        <th class="usa-table__header">State</th>
-        <th class="usa-table__header">City</th>
-        <th class="usa-table__header">Address</th>
-        <th class="usa-table__header">Last Validated</th>
-        <th class="usa-table__header">Accidents</th>
-      </tr>
-    </thead>
-    <tbody class="usa-table__body">
-      <tr class="usa-table__row" v-for="r in props.rows" :key="r.EPAFacilityID">
-                      <td class="usa-table__cell">{{ r.EPAFacilityID }}</td>
-        <td class="usa-table__cell">
-          <NuxtLink :to="`/facility/${r.EPAFacilityID}`">{{ r.name }}</NuxtLink>
-        </td>
-        <td class="usa-table__cell">{{ r.state.name }}</td>
-        <td class="usa-table__cell">{{ r.city }}</td>
-        <td class="usa-table__cell">{{ r.address }}</td>
-        <td class="usa-table__cell">{{ r.sub_last?.date_val || '—' }}</td>
-        <td class="usa-table__cell">{{ r.sub_last?.num_accidents ?? '—' }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <p v-else class="text-center usa-prose">No matches.</p>
-
-  <!-- Pagination stub -->
-  <nav class="usa-pagination" v-if="props.rows.length">
+    <nav class="usa-pagination !no-underline" v-if="totalPages > 1">
     <ul class="usa-pagination__list">
-      <li class="usa-pagination__item usa-pagination__item--arrow">
-        <button class="usa-button usa-button--unstyled" disabled>‹</button>
+      <!-- previous arrow -->
+      <li class="usa-pagination__item usa-pagination__item--arrow ">
+        <button
+          class="usa-button usa-button--unstyled flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg"
+          :disabled="page === 1"
+          @click="goto(page - 1)"
+        >‹</button>
       </li>
-      <li class="usa-pagination__item usa-pagination__item--current"><span>1</span></li>
-      <li class="usa-pagination__item"><button class="usa-button usa-button--unstyled">2</button></li>
-      <li class="usa-pagination__item"><button class="usa-button usa-button--unstyled">3</button></li>
-      <li class="usa-pagination__item usa-pagination__item--arrow">
-        <button class="usa-button usa-button--unstyled">›</button>
+
+      <!-- always show first page -->
+      <li
+        v-if="visiblePages[0] > 1"
+        class="usa-pagination__item bg-slate-100 rounded-md  no-underline"
+      >
+        <button class="usa-button usa-button--unstyled flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg" @click="goto(1)">1</button>
+      </li>
+      <li
+        v-if="visiblePages[0] > 2"
+        class="usa-pagination__item  !text-decoration-none flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg "
+      ><span>…</span></li>
+
+      <!-- sliding window -->
+      <li
+        v-for="p in visiblePages"
+        :key="p"
+        class="usa-pagination__item bg-slate-100 rounded-md !text-decoration-noneflex justify-center items-center "
+        :class="{ 'usa-pagination__item--current': p === page }"
+      >
+        <button
+          v-if="p !== page"
+          class="usa-button usa-button--unstyled flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg"
+          @click="goto(p)"
+        >{{ p }}</button>
+        <span v-else>{{ p }}</span>
+      </li>
+
+      <!-- ellipsis before last -->
+      <li
+        v-if="visiblePages[visiblePages.length - 1] < totalPages - 1"
+        class="usa-pagination__item flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg"
+      ><span>…</span></li>
+      <!-- always show last page -->
+      <li
+        v-if="visiblePages[visiblePages.length - 1] < totalPages"
+        class="usa-pagination__item flex justify-center items-center"
+      >
+        <button
+          class="usa-button usa-button--unstyled flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg"
+          @click="goto(totalPages)"
+        >{{ totalPages }}</button>
+      </li>
+
+      <!-- next arrow -->
+      <li class="usa-pagination__item usa-pagination__item--arrow flex justify-center items-center">
+        <button
+          class="usa-button usa-button--unstyled flex justify-center items-center bg-slate-100 hover:bg-slate-200 cursor-pointer p-3 text-lg font-semibold rounded-lg"
+          :disabled="page === totalPages"
+          @click="goto(page + 1)"
+        >›</button>
       </li>
     </ul>
   </nav>
+  
+  <table class="usa-table usa-table--striped usa-table--borderless usa-table--full" v-if="rows.length">
+    <thead>
+      <tr>
+        <th>EPA ID</th>
+        <th>Facility</th>
+        <th>State</th>
+        <th>City</th>
+        <th>Address</th>
+        <th>Last Validated</th>
+        <th>Accidents</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="r in rows" :key="r.EPAFacilityID">
+        <td>{{ r.EPAFacilityID }}</td>
+        <td>
+          <NuxtLink :to="`/facility/${r.EPAFacilityID}`">{{ r.name }}</NuxtLink>
+        </td>
+        <td>{{ r.state.name }}</td>
+        <td>{{ r.city }}</td>
+        <td>{{ r.address }}</td>
+        <td>{{ r.sub_last?.date_val ?? '—' }}</td>
+        <td>{{ r.sub_last?.num_accidents ?? '—' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p v-else class="usa-prose text-center">No matches.</p>
+
+
 </template>
 
 <style scoped>
-.usa-table { margin-top: 1.5rem; }
-.usa-pagination { display: flex; justify-content: center; margin-top: 1rem; }
+.usa-table { margin-top: 1rem; }
+.usa-pagination { display: flex; justify-content: center; margin: 1rem 0; }
 </style>

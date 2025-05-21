@@ -32,7 +32,9 @@ const filters: any = reactive({
   chemicals: [] as string[],
   chemicalType: '',
   programLevel: '',
-  naicsCodes: [] as string[]
+  naicsCodes: [] as string[],
+  page: 1,
+  perPage: 10
 })
 
 const filtersModel = computed({
@@ -54,8 +56,10 @@ function clearFilters() {
     else if (Array.isArray(val)) (filters[k as keyof typeof filters] as any) = []
     else filters[k as keyof typeof filters] = '' as any
   })
+  filters.page = 1
   runSearch()
 }
+
 
 /** Run the search API with exactly these filters */
 function runSearch() {
@@ -75,6 +79,7 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
 
 <template>
   <section class="usa-card usa-card--bordered">
+    <div>
     <header class="usa-card__header !px-0 ">
       <h1 class="usa-card__heading !text-3xl font-bold">Risk Management Plan</h1>
       <p class="!text-lg !font-normal">
@@ -116,12 +121,19 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
       </button>
     </div>
   </section>
+    </div>
   
     <ArcFacilitiesMap :facilities="store.results" />
   
   <!-- Results -->
   <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">
-    <ResultsTable :rows="store.results" />
+    <ResultsTable
+  :rows="store.results"
+  :total="store.total"
+  :page="store.page"
+  :per-page="store.perPage"
+  @page-changed="store.goToPage"
+  />
   </section>
   </section>
 

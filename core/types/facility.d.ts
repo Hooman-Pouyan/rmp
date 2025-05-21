@@ -12,20 +12,35 @@ export interface FacilityLite {
   EPAFacilityID: string;
   name: string;
   city: string;
-  state: { name: string; abbr: string };
-  zip: string;
-  address?: string; // Optional because it may not always exist
-  names_prev?: string[]; // Optional array of previous names
+
+  // our injected state object
+  state: {
+    abbr: string;
+    name: string;
+  };
+
+  // only present on detail objects; keep optional
+  zip?: string;
+  address?: string;
+
+  // optional summary fields
+  company_1?: string;
+  company_2?: string;
+  county_fips?: string;
+  names_prev?: string[];
+
   sub_last?: {
-    id: string;
-    date_val: string;
+    // in the by-state summary you only get these two at a minimum
+    id?: string;
+    date_val?: string;
     date_dereg?: string;
     lat_sub?: number;
     lon_sub?: number;
     num_accidents?: number;
     latest_accident?: string;
-  }; // Optional object for submission info
+  };
 }
+
 
 export interface CountyGroup {
   fips: string
