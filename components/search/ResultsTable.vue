@@ -112,7 +112,7 @@ function goto(p: number) {
     </ul>
   </nav>
   
-  <table class="usa-table usa-table--striped usa-table--borderless usa-table--full" v-if="rows.length">
+  <table class="usa-table usa-table--striped usa-table--borderless w-full" v-if="rows.length">
     <thead>
       <tr>
         <th>EPA ID</th>

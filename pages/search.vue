@@ -78,9 +78,9 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
 </script>
 
 <template>
-  <section class="usa-card usa-card--bordered">
+  <section class="usa-card usa-card--bordered grid grid-cols-2 items-center w-full h-fit py-2 px-3 gap-3">
     <div>
-    <header class="usa-card__header !px-0 ">
+    <header class="usa-card__header !px-0 col-span-1">
       <h1 class="usa-card__heading !text-3xl font-bold">Risk Management Plan</h1>
       <p class="!text-lg !font-normal">
         The Risk Management Plan (RMP) rule implements Section 112(r) of the 1990 Clean Air Act …
@@ -110,7 +110,7 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
 
     </section>
 
-    <section class="px-5 m-3">
+    <section class="col-span-1">
     <!-- Clear + Search -->
     <div class="display-flex flex-justify-end gap-2">
       <button class="usa-button usa-button--outline" @click="clearFilters">
@@ -126,7 +126,10 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
     <ArcFacilitiesMap :facilities="store.results" />
   
   <!-- Results -->
-  <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">
+
+  </section>
+
+    <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">
     <ResultsTable
   :rows="store.results"
   :total="store.total"
@@ -134,7 +137,6 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
   :per-page="store.perPage"
   @page-changed="store.goToPage"
   />
-  </section>
   </section>
 
 </template>
