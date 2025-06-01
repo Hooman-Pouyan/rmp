@@ -1,5 +1,5 @@
 <template>
-  <footer class="drexel-footer" role="contentinfo">
+  <footer class="drexel-footer " role="contentinfo">
     <div class="footer-container">
       <div class="footer-brand">
         <img
