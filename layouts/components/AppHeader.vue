@@ -21,7 +21,7 @@
             US EPA
           </a>
         </h1>
-        <p class="site-slogan">United States Environmental Protection Agency</p>
+        <p class="site-slogan">United States Agency</p>
       </div>
 
       <!-- Search -->
@@ -56,7 +56,7 @@
           <a href="https://www.epa.gov/laws-regulations" target="_blank">Laws & Regulations</a>
         </li>
         <li>
-          <a href="https://www.epa.gov/aboutepa" target="_blank">About EPA</a>
+          <a href="https://www.epa.gov/aboutepa" target="_blank">About RMP</a>
         </li>
       </ul>
     </nav>
