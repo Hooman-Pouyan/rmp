@@ -5,7 +5,7 @@ import AppFooter from './components/AppFooter.vue'
 
 <template>
   <!-- USWDS official banner -->
-  <section class="usa-banner relative" aria-label="Official government website">
+  <!-- <section class="usa-banner relative" aria-label="Official government website">
     <div class="usa-banner__header">
       <div class="usa-banner__inner">
         <p class="usa-banner__header-text">
@@ -13,7 +13,7 @@ import AppFooter from './components/AppFooter.vue'
         </p>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <AppHeader />
 
