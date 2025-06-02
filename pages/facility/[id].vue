@@ -4,7 +4,8 @@
     <div v-if="loading" class="usa-prose h-[250px]">
   <div className="w-full h-full flex justify-center items-center">
                                     <span className="animate-spin rounded-full flex justify-center items-center h-16 w-16 border-t-4 border-blue-500"></span>
-                              </div>    </div>
+                              </div>
+    </div>
     <div v-else-if="error" class="usa-prose">
       <div class="usa-alert usa-alert--error">
         <div class="usa-alert__body">

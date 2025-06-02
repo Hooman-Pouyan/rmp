@@ -38,12 +38,12 @@ export const useFacilitiesStore = defineStore("fac", {
     // pagination metadata
     total: 0,
     page: 1,
-    perPage: 10,
+    perPage: 20,
 
     // to remember what filters we last used
     filters: {} as Record<string, any>,
 
-    loading: false,
+    loading: true,
   }),
 
   actions: {
@@ -78,6 +78,7 @@ export const useFacilitiesStore = defineStore("fac", {
           this.total = data.value.total;
           this.page = data.value.page;
           this.perPage = data.value.perPage;
+          this.loading = false;
         }
       } catch (err) {
         console.error("Unexpected search error", err);

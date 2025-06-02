@@ -20,10 +20,12 @@ const totalPages = computed(() =>
 
 // how many numbered buttons to show in the middle
 const windowSize = 5
+let loading = true
 
 // compute the sliding window of page numbers
 const visiblePages = computed(() => {
   const tp = totalPages.value
+  if (tp) loading = false
   const half = Math.floor(windowSize / 2)
   let start = Math.max(1, props.page - half)
   let end = Math.min(tp, props.page + half)
@@ -47,6 +49,8 @@ function goto(p: number) {
 </script>
 
 <template>
+
+
     <nav class="usa-pagination !no-underline" v-if="totalPages > 1">
     <ul class="usa-pagination__list">
       <!-- previous arrow -->

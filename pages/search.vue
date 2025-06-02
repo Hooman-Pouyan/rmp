@@ -34,7 +34,7 @@ const filters: any = reactive({
   programLevel: '',
   naicsCodes: [] as string[],
   page: 1,
-  perPage: 10
+  perPage: 20
 })
 
 const filtersModel = computed({
@@ -46,7 +46,10 @@ const filtersModel = computed({
 })
 
 
+
 const store = useFacilitiesStore()
+  runSearch()
+
 
 /** Reset every filter back to default */
 function clearFilters() {
@@ -130,6 +133,14 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
   </section>
 
     <section class="margin-y-4 w-full h-500px overflow-x-hidden overflow-y-scroll">
+        <div  v-if="store.loading" class="w-full h-full flex flex-col space-y-2 justify-center items-center">
+                                    <span class="animate-spin rounded-full flex justify-center items-center h-16 w-16 border-t-4 border-blue-500">
+                                    </span>
+                                    <span>
+          Retrieving Facilities ...
+                                      </span>
+      </div>
+      <div v-else>
     <ResultsTable
   :rows="store.results"
   :total="store.total"
@@ -137,6 +148,8 @@ function onFiltersUpdate(newPayload: Record<string, any>) {
   :per-page="store.perPage"
   @page-changed="store.goToPage"
   />
+      </div>
+
   </section>
 
 </template>
