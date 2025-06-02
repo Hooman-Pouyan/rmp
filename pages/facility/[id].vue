@@ -17,7 +17,7 @@
       <!-- Facility Header Card -->
       <div class="usa-card usa-card--bordered margin-bottom-4">
         <header class="usa-card__header">
-          <h1 class="usa-card__heading">{{ facility.name }}</h1>
+          <h1 class="usa-card__heading">{{ facility?.name }}</h1>
         </header>
         <div class="usa-card__body grid-row grid-gap">
           <!-- Left column: Basic Info -->
@@ -25,27 +25,27 @@
             <dl class="usa-identifier-list">
               <div class="usa-identifier-list__item">
                 <dt class="usa-identifier-list__label">EPA Facility ID</dt>
-                <dd class="usa-identifier-list__value">{{ facility.EPAFacilityID }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.EPAFacilityID }}</dd>
               </div>
               <div class="usa-identifier-list__item">
                 <dt class="usa-identifier-list__label">Address</dt>
-                <dd class="usa-identifier-list__value">{{ facility.address }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.address }}</dd>
               </div>
               <div class="usa-identifier-list__item">
                 <dt class="usa-identifier-list__label">City</dt>
-                <dd class="usa-identifier-list__value">{{ facility.city }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.city }}</dd>
               </div>
               <div class="usa-identifier-list__item">
                 <dt class="usa-identifier-list__label">State</dt>
-                <dd class="usa-identifier-list__value">{{ facility.state }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.state }}</dd>
               </div>
               <div class="usa-identifier-list__item">
                 <dt class="usa-identifier-list__label">ZIP Code</dt>
-                <dd class="usa-identifier-list__value">{{ facility.zip }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.zip }}</dd>
               </div>
-              <div class="usa-identifier-list__item" v-if="facility.county_fips">
+              <div class="usa-identifier-list__item" v-if="facility?.county_fips">
                 <dt class="usa-identifier-list__label">County FIPS</dt>
-                <dd class="usa-identifier-list__value">{{ facility.county_fips }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.county_fips }}</dd>
               </div>
             </dl>
           </div>
@@ -53,17 +53,17 @@
           <!-- Right column: Company / Operator -->
           <div class="tablet:grid-col-6">
             <dl class="usa-identifier-list">
-              <div class="usa-identifier-list__item" v-if="facility.company_1">
+              <div class="usa-identifier-list__item" v-if="facility?.company_1">
                 <dt class="usa-identifier-list__label">Company 1</dt>
-                <dd class="usa-identifier-list__value">{{ facility.company_1 }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.company_1 }}</dd>
               </div>
-              <div class="usa-identifier-list__item" v-if="facility.company_2">
+              <div class="usa-identifier-list__item" v-if="facility?.company_2">
                 <dt class="usa-identifier-list__label">Company 2</dt>
-                <dd class="usa-identifier-list__value">{{ facility.company_2 }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.company_2 }}</dd>
               </div>
-              <div class="usa-identifier-list__item" v-if="facility.operator">
+              <div class="usa-identifier-list__item" v-if="facility?.operator">
                 <dt class="usa-identifier-list__label">Operator</dt>
-                <dd class="usa-identifier-list__value">{{ facility.operator }}</dd>
+                <dd class="usa-identifier-list__value">{{ facility?.operator }}</dd>
               </div>
               <div class="usa-identifier-list__item" v-if="mostRecentSubmission">
                 <dt class="usa-identifier-list__label">Last Validated</dt>
@@ -107,7 +107,7 @@
               <td class="usa-table__cell">{{ sub.num_accidents ?? '0' }}</td>
               <td class="usa-table__cell">{{ sub.name }}</td>
             </tr>
-            <tr v-if="!facility.submissions.length">
+            <tr v-if="!facility?.submissions.length">
               <td colspan="6" class="usa-table__cell text-center">No submissions found.</td>
             </tr>
           </tbody>

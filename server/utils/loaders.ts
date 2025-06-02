@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import Database from 'better-sqlite3'
-import { readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs'; 
 // import type { StateFacilities } from '~/types/facility'
 
 /* ---------- JSON helpers ---------- */
