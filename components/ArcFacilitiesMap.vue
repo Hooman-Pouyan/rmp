@@ -122,6 +122,13 @@ async function applyFilter() {
   layer.definitionExpression = ids.length
     ? `id IN (${ids.map((id) => `'${id}'`).join(',')})`
     : ''
+    
+  if (ids.length) {
+    layer.definitionExpression = `id IN (${ids.map((id) => `'${id}'`).join(',')})`
+  } else {
+    // “1=1” forces no filter → show all features
+    layer.definitionExpression = "1=1"
+  }
 
   await view.when()
   const { extent } = await layer.queryExtent({ where: layer.definitionExpression || '1=1' })
