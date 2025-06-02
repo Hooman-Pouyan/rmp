@@ -56,8 +56,10 @@ const execSummary = computed<Array<AnyObject>>(() => submission.value?._exec_sum
 
 <template>
   <section v-if="loading" class="padding h-screen">
-    <p>Loading…</p>
-  </section>
+  <div className="w-full h-full flex justify-center items-center">
+                                    <span className="animate-spin rounded-full  flex justify-center items-center h-16 w-16 border-t-4 border-blue-500"></span>
+                              </div>
+                          </section>
 
   <section v-else-if="error" class="padding">
     <p class="error-text">{{ error }}</p>
