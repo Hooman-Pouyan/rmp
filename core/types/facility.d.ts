@@ -1,11 +1,11 @@
 export interface SubmissionLite {
-  id: number
-  date_val: string
-  date_dereg: string | null
-  lat_sub: string
-  lon_sub: string
-  num_accidents: number | null
-  latest_accident: string | null
+  id: number;
+  date_val: string;
+  date_dereg: string | null;
+  lat_sub: string;
+  lon_sub: string;
+  num_accidents: number | null;
+  latest_accident: string | null;
 }
 
 export interface FacilityLite {
@@ -41,17 +41,16 @@ export interface FacilityLite {
   };
 }
 
-
 export interface CountyGroup {
-  fips: string
-  name: string
-  facilities: FacilityLite[]
+  fips: string;
+  name: string;
+  facilities: FacilityLite[];
 }
 
 export interface StateFacilities {
-  abbr: string
-  name: string
-  counties: CountyGroup[]
+  abbr: string;
+  name: string;
+  counties: CountyGroup[];
 }
 
 export interface ProcessChemical {
@@ -308,3 +307,77 @@ export interface SubmissionDetail {
   _exec_summary: ExecSummaryBlock[];
 }
 
+interface FacilityLite {
+  EPAFacilityID: string;
+  name: string;
+  city: string;
+  address: string;
+  names_prev: string[];
+  sub_last: {
+    id: number;
+    date_val: string;
+    date_dereg: string | null;
+    lat_sub: string;
+    lon_sub: string;
+    num_accidents: number | null;
+    latest_accident: string | null;
+  };
+  state: { name: string; abbr: string };
+}
+
+interface StateFacilities {
+  abbr: string;
+  name: string;
+  counties: Array<{
+    fips: string;
+    name: string;
+    facilities: Array<{
+      EPAFacilityID: string;
+      name: string;
+      city: string;
+      address: string;
+      names_prev: string[];
+      sub_last: {
+        id: number;
+        date_val: string;
+        date_dereg: string | null;
+        lat_sub: string;
+        lon_sub: string;
+        num_accidents: number | null;
+        latest_accident: string | null;
+      };
+    }>;
+  }>;
+}
+
+interface SubmissionSummary {
+  id: number;
+  date_rec: string;
+  date_val: string;
+  date_dereg: string | null;
+  lat_sub: string;
+  lon_sub: string;
+  num_accidents: number | null;
+  latest_accident: string | null;
+  name: string;
+  company_1: string | null;
+  company_2: string | null;
+  operator: string | null;
+}
+
+interface FacilityDetail {
+  EPAFacilityID: string;
+  name: string;
+  state: string;
+  city: string;
+  ValidationDate: string;
+  address: string;
+  zip: string;
+  county_fips?: string;
+  company_1?: string;
+  company_2?: string;
+  operator?: string;
+  submissions: SubmissionSummary[];
+  accidents: any[];
+  names_prev: string[];
+}
