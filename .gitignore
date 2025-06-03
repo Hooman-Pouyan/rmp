@@ -11,7 +11,6 @@ data
 node_modules
 
 server/sql/*.sqlite
-server/data/**/*.json
 server/sql/*.sqlite
 server/db/*.sqlite
 
