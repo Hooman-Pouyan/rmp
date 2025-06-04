@@ -8,14 +8,16 @@ from pathlib import Path
 # ──────────────────────────────────────────────────────────────────────────────
 # ADJUST these paths if your repo layout is different:
 DB_PATH      = Path("db/RMPData.sqlite")
-OUTPUT_JSON  = Path("data/master_submissions.json")
+OUTPUT_JSON  = Path("static/data/master_submissions.json")  # ensure this matches “static/data/…” from search API
 # ──────────────────────────────────────────────────────────────────────────────
 
 # 1) Top‐level columns to keep from tblS1Facilities (must match your SQLite column names).
-#    We will rename "FacilityID" → "submissionId" when writing JSON.
+#    We added "FacilityAddress" so that each JSON record includes its street address.
+#    We rename "FacilityID" → "submissionId" when writing JSON.
 TOP_LEVEL_FIELDS = [
     "FacilityID",            # → will become "submissionId" in output
     "FacilityName",
+    "FacilityAddress",       # newly added: street address from tblS1Facilities
     "FacilityCity",
     "FacilityState",
     "FacilityZipCode",
@@ -43,12 +45,14 @@ TOP_LEVEL_FIELDS = [
     "FRS_Long",
 ]
 
+
 def get_existing_tables(cursor):
     """
     Return a set of all table names in the current SQLite connection.
     """
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     return { row["name"] for row in cursor.fetchall() }
+
 
 def pare_down_process(cursor, process_row, existing_tables):
     """
@@ -99,7 +103,6 @@ def pare_down_process(cursor, process_row, existing_tables):
             for prev2 in cursor.fetchall():
                 val = prev2["MH_ToxicRelease"]
                 if val is not None:
-                    # Consider "Yes" / "yes" / 1 / True → True
                     if isinstance(val, str):
                         if val.strip().lower() == "yes":
                             mh_flag_found = True
@@ -125,13 +128,14 @@ def pare_down_process(cursor, process_row, existing_tables):
     out["MH_ToxicRelease"] = mh_flag_found
     return out
 
+
 def pare_down_submission(cursor, submission_row, existing_tables):
     """
     Given a single row from tblS1Facilities, build a new dict containing:
       - "submissionId"    (from FacilityID)
-      - the remaining TOP_LEVEL_FIELDS
-      - "processes": [ … ]      # via pare_down_process
-      - (optionally) "accidents":  [ … ]  # if non‐empty
+      - the remaining TOP_LEVEL_FIELDS, including "FacilityAddress"
+      - "processes": [ … ]            # via pare_down_process
+      - (optionally) "accidents": [ … ]  # if non‐empty
     """
     sub_id = submission_row["FacilityID"]
     out = {}
@@ -141,6 +145,7 @@ def pare_down_submission(cursor, submission_row, existing_tables):
         if key == "FacilityID":
             out["submissionId"] = submission_row["FacilityID"]
         else:
+            # If the column is missing, .get will return None
             out[key] = submission_row.get(key)
 
     # ── 2. Gather all processes for this submission ─────────────────────────────
@@ -169,6 +174,7 @@ def pare_down_submission(cursor, submission_row, existing_tables):
             out["accidents"] = [dict(arow) for arow in acc_rows]
 
     return out
+
 
 def main():
     # 1) Verify SQLite exists
@@ -200,12 +206,13 @@ def main():
 
     conn.close()
 
-    # 4) Write the big array to master_submissions.json
+    # 4) Ensure output directory exists & write the JSON
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_JSON.open("w", encoding="utf-8") as outf:
         json.dump(master_list, outf, indent=2, ensure_ascii=False)
 
     print(f"Wrote {len(master_list)} submissions → {OUTPUT_JSON!s}")
+
 
 if __name__ == "__main__":
     main()

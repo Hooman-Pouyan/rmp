@@ -1,13 +1,77 @@
 // server/api/search.get.ts
-import { readFile } from "fs/promises";
-import { defineEventHandler, getQuery } from "h3";
-import type { H3Event } from "h3";
 
+import { readFile } from "fs/promises";
+import { defineEventHandler, getQuery, createError } from "h3";
+import type { H3Event } from "h3";
+import { join } from "path";
+
+/**
+ * A minimal map from state abbreviation → full state name.
+ * (Include all U.S. states as needed.)
+ */
+const STATE_NAMES: Record<string, string> = {
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DE: "Delaware",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  IA: "Iowa",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  ME: "Maine",
+  MD: "Maryland",
+  MA: "Massachusetts",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MS: "Mississippi",
+  MO: "Missouri",
+  MT: "Montana",
+  NE: "Nebraska",
+  NV: "Nevada",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NY: "New York",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VT: "Vermont",
+  VA: "Virginia",
+  WA: "Washington",
+  WV: "West Virginia",
+  WI: "Wisconsin",
+  WY: "Wyoming",
+};
+
+/**
+ * The shape of each submission record in master_submissions.json
+ * (This assumes your Python script now includes FacilityAddress as well.)
+ */
 interface MasterSubmission {
   submissionId: number;
   FacilityName: string;
+  FacilityAddress: string;         // newly added by Python
   FacilityCity: string;
-  FacilityState: string;
+  FacilityState: string;           // abbreviation, e.g. "OH"
   FacilityZipCode: string;
   FacilityCountyFIPS: string;
   FacilityLatDecDegs: string;
@@ -38,26 +102,23 @@ interface MasterSubmission {
     naics: Array<{ NAICSCode: string }>;
     MH_ToxicRelease: boolean;
   }>;
-  accidents?: Record<string, any>[]; // may be absent if empty
+  accidents?: Record<string, any>[]; // may be empty or omitted
 }
 
-// We will group submissions by EPAFacilityID.
-// Then for each facility we pick out “facility‐level” fields from any one submission (they are identical across submissions).
-// We also compute “sub_last” = the submission with the latest SafetyInspectionDate (if any),
-//    and count total accidents across all submissions.
-
+/**
+ * The shape of each facility as returned by this API.
+ */
 interface FacilityResult {
   EPAFacilityID: string;
   name: string;
-  address: string; // we don't have street address; we’ll leave it empty
+  address: string;
   city: string;
   county_fips: string;
   state: { abbr: string; name: string };
   sub_last?: {
-    date_val: string; // use SafetyInspectionDate as proxy
+    date_val: string;   // most recent SafetyInspectionDate
     num_accidents: number;
   };
-  // these two are only shown internally to the accordion expansion; not directly used in table
   submissions: Array<{
     submissionId: number;
     SafetyInspectionDate: string | null;
@@ -70,7 +131,7 @@ interface FacilityResult {
       MH_ToxicRelease: boolean;
     }>;
   }>;
-  // for the map layer:
+  // fields used by the map component
   lat: number | null;
   lon: number | null;
   name_for_map: string;
@@ -83,21 +144,32 @@ interface FacilityResult {
 let __cachedMaster: FacilityResult[] | null = null;
 
 /**
- * Load and reshape the single `master_submissions.json` into an array of unique facilities,
- * each with a "submissions" array and a computed "sub_last".
+ * 1) Load the raw master JSON from `/static/data/master_submissions.json`
+ * 2) Group by EPAFacilityID
+ * 3) Build one FacilityResult per unique EPAFacilityID
+ * 4) Cache it in memory for subsequent calls
  */
 async function loadAndIndexMaster(): Promise<FacilityResult[]> {
   if (__cachedMaster) {
     return __cachedMaster;
   }
 
-  const raw = await readFile(
-    new URL("../data/master_submissions.json", import.meta.url),
-    "utf-8"
-  );
+  // NOTE: The JSON file was moved into `static/data` so that Nuxt/Nitro will bundle it.
+  // ‐ at runtime it lives under `<root>/static/data/master_submissions.json`
+  const jsonPath = join(process.cwd(), "static/data/master_submissions.json");
+  let raw: string;
+  try {
+    raw = await readFile(jsonPath, "utf-8");
+  } catch (err) {
+    throw createError({
+      statusCode: 500,
+      message: `Cannot load master JSON at ${jsonPath}`,
+    });
+  }
+
   const allSubs: MasterSubmission[] = JSON.parse(raw);
 
-  // Group by EPAFacilityID
+  // Group submissions by EPAFacilityID
   const grouped = new Map<string, MasterSubmission[]>();
   for (const sub of allSubs) {
     const key = sub.EPAFacilityID;
@@ -108,26 +180,25 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
   const facilities: FacilityResult[] = [];
 
   for (const [epaId, submissions] of grouped.entries()) {
-    // Take “facility‐level” data from the first submission
+    // Pick an “exemplar” submission to read facility‐level fields
     const exemplar = submissions[0];
     const city = exemplar.FacilityCity;
     const stateAbbr = exemplar.FacilityState;
     const county = exemplar.FacilityCountyFIPS;
-    // no street‐level address in master JSON, leave blank
-    const address = "";
+    const address = exemplar.FacilityAddress; // now present
 
-    // Sort submissions by SafetyInspectionDate (descending) to pick sub_last
+    // Sort all submissions by SafetyInspectionDate descending, so the first is the most recent
     const sortedByDate = submissions.slice().sort((a, b) => {
       const da = a.SafetyInspectionDate;
       const db = b.SafetyInspectionDate;
       if (!da && !db) return 0;
       if (!da) return 1;
       if (!db) return -1;
-      return da.localeCompare(db);
+      return db.localeCompare(da); // reverse chronological
     });
     const latestSub = sortedByDate[0];
 
-    // Count accidents in each submission, sum them up
+    // Count total accidents across all submissions
     let totalAccidents = 0;
     for (const s of submissions) {
       if (Array.isArray(s.accidents)) {
@@ -135,7 +206,7 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
       }
     }
 
-    // Build a “submissions” array pared to only fields the front‐end needs:
+    // Build a pared‐down “submissions” array for the accordion
     const subsForApi = submissions.map((s) => ({
       submissionId: s.submissionId,
       SafetyInspectionDate: s.SafetyInspectionDate,
@@ -155,7 +226,10 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
       address,
       city,
       county_fips: county,
-      state: { abbr: stateAbbr, name: stateAbbr },
+      state: {
+        abbr: stateAbbr,
+        name: STATE_NAMES[stateAbbr] || stateAbbr,
+      },
       sub_last:
         latestSub.SafetyInspectionDate !== null
           ? {
@@ -182,7 +256,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const q = getQuery(event) as Record<string, string | string[]>;
 
   // ────────────────────────────────────────────────────────────────────────────
-  // 1) Helper functions to read filters from query string
+  // 1) Helper functions to parse query‐string filters
   // ────────────────────────────────────────────────────────────────────────────
   const first = (v: string | string[] | undefined): string =>
     Array.isArray(v) ? v[0] : v || "";
@@ -206,7 +280,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const zipQ = first(q.zip).trim();
   const activeOnly = toBool(q.activeOnly);
 
-  // Process‐level filters (all strings):
+  // Process‐level filters:
   const chemicalsQ = Array.isArray(q.chemicals)
     ? (q.chemicals as string[])
     : first(q.chemicals)
@@ -221,17 +295,17 @@ export default defineEventHandler(async (event: H3Event) => {
     ? [first(q.naicsCodes)]
     : [];
 
-  // Pagination:
+  // Pagination parameters:
   const page = Math.max(1, parseInt(first(q.page) || "1", 10));
   const perPage = Math.max(1, parseInt(first(q.perPage) || "20", 10));
 
   // ────────────────────────────────────────────────────────────────────────────
-  // 2) Load & cache master list of facilities
+  // 2) Load & cache the facilities list
   // ────────────────────────────────────────────────────────────────────────────
   const allFacilities = await loadAndIndexMaster();
 
   // ────────────────────────────────────────────────────────────────────────────
-  // 3) Apply “facility‐level” filters first
+  // 3) Apply facility‐level filters
   // ────────────────────────────────────────────────────────────────────────────
   let filtered = allFacilities.filter((f) => {
     // a) facilityName
@@ -245,52 +319,39 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // b) facilityId
-    if (facilityIdQ) {
-      if (f.EPAFacilityID !== facilityIdQ) return false;
+    if (facilityIdQ && f.EPAFacilityID !== facilityIdQ) {
+      return false;
     }
 
-    // c) parentCompany: match against any submission’s ParentCompanyName
+    // c) parentCompany: check exemplar-level ParentCompanyName if you carried it
     if (parentCompanyQ) {
-      const matches = f.submissions.some((s) => {
-        // we don’t carry ParentCompanyName down into “submissions” – instead check exemplar
-        return (
-          f.EPAFacilityID && // exemplar-level holds the original ParentCompanyName
-          (f.name || "").toLowerCase().includes(parentCompanyQ) // fallback
-        );
-      });
-      if (!matches) return false;
+      // (We did not carry ParentCompanyName down—skip unless you add it.)
     }
 
-    // d) facilityDUNS: master has FacilityDUNS on exemplar
-    if (facilityDUNSQ) {
-      // exemplar-level facilityDUNS was lost in our FacilityResult; we did not carry that field.
-      // So this filter is a no-op unless you re-add FacilityDUNS to FacilityResult. Skip.
-    }
+    // d) facilityDUNS: skip unless you carried that field
 
-    // e) address – no street in our master, skip entirely
+    // e) address
+    if (addressQ && exactAddress) {
+      if (!f.address.toLowerCase().includes(addressQ)) return false;
+    } else if (addressQ) {
+      if (!f.address.toLowerCase().includes(addressQ)) return false;
+    }
 
     // f) city
-    if (cityQ) {
-      if (f.city.toLowerCase() !== cityQ) return false;
-    }
+    if (cityQ && f.city.toLowerCase() !== cityQ) return false;
 
     // g) state
-    if (stateQ) {
-      if (f.state.abbr !== stateQ) return false;
-    }
+    if (stateQ && f.state.abbr !== stateQ) return false;
 
     // h) county
-    if (countyQ) {
-      if (f.county_fips !== countyQ) return false;
-    }
+    if (countyQ && f.county_fips !== countyQ) return false;
 
     // i) zip
     if (zipQ) {
-      // We never carried ZipCode to facility‐level. Skip unless you add it.
-      return true;
+      // We did not carry ZipCode at facility level—skip unless you add it
     }
 
-    // j) activeOnly: treat “active” as any facility whose latest SafetyInspectionDate is not null
+    // j) activeOnly
     if (activeOnly) {
       if (!f.sub_last?.date_val) return false;
     }
@@ -299,34 +360,28 @@ export default defineEventHandler(async (event: H3Event) => {
   });
 
   // ────────────────────────────────────────────────────────────────────────────
-  // 4) Apply “submission‐level” filters: programLevel, chemicals, naicsCodes
-  //    We keep any facility if **any** of its submissions matches _all_ requested filters.
+  // 4) Apply submission‐level filters if any
   // ────────────────────────────────────────────────────────────────────────────
-  function submissionMatchesFilters(
-    s: FacilityResult["submissions"][0]
-  ): boolean {
-    // a) programLevel
+  function submissionMatches(s: FacilityResult["submissions"][0]): boolean {
+    // a) ProgramLevel
     if (programLevelQ !== null) {
       const ok = s.processes.some((p) => p.ProgramLevel === programLevelQ);
       if (!ok) return false;
     }
-
-    // b) naicsCodes: require at least one overlap
+    // b) NAICS codes
     if (naicsCodesQ.length) {
       const ok = s.processes.some((p) =>
         p.naics.some((n) => naicsCodesQ.includes(n.NAICSCode))
       );
       if (!ok) return false;
     }
-
-    // c) chemicals: require at least one overlap on ChemicalID
+    // c) Chemicals
     if (chemicalsQ.length) {
       const ok = s.processes.some((p) =>
         p.chemicals.some((c) => chemicalsQ.includes(String(c.ChemicalID)))
       );
       if (!ok) return false;
     }
-
     return true;
   }
 
@@ -336,7 +391,7 @@ export default defineEventHandler(async (event: H3Event) => {
     chemicalsQ.length > 0
   ) {
     filtered = filtered.filter((f) => {
-      return f.submissions.some((s) => submissionMatchesFilters(s));
+      return f.submissions.some((s) => submissionMatches(s));
     });
   }
 
@@ -348,7 +403,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const pageSlice = filtered.slice(offset, offset + perPage);
 
   // ────────────────────────────────────────────────────────────────────────────
-  // 6) Return final JSON
+  // 6) Return the paged result
   // ────────────────────────────────────────────────────────────────────────────
   return {
     total: totalMatched,

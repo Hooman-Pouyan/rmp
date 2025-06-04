@@ -10,10 +10,11 @@ export default defineNuxtConfig({
   ],
   dir: {
     pages: "pages",
+    assets: "data"
   },
   nitro: {
     // expose ./data + ./db to Nitro (server) bundle
-    // publicAssets: [{ dir: "data", maxAge: 60 }],
+    publicAssets: [{ dir: "data", maxAge: 60 }],
   },
   typescript: { strict: true },
   app: {
