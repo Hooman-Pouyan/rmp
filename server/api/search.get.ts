@@ -274,9 +274,13 @@ export default defineEventHandler(async (event: H3Event) => {
     ? [first(q.naicsCodes)]
     : [];
 
+    const perPageRaw = first(q.perPage) || '20'
+const unlimited  = perPageRaw === '0' || perPageRaw.toLowerCase() === 'all'
+const perPage    = unlimited ? Number.MAX_SAFE_INTEGER
+                              : Math.max(1, parseInt(perPageRaw, 10))
+
   // Pagination
   const page = Math.max(1, parseInt(first(q.page) || "1", 10));
-  const perPage = Math.max(1, parseInt(first(q.perPage) || "20", 10));
 
   const allFacilities = await loadAndIndexMaster();
 
@@ -372,15 +376,13 @@ export default defineEventHandler(async (event: H3Event) => {
     );
   }
 
+  
   // 5) Pagination
-  const totalMatched = filtered.length;
+const total   = filtered.length
+const slice   = unlimited ? filtered        
+                          : filtered.slice((page-1)*perPage, page*perPage)
   const offset = (page - 1) * perPage;
   const pageSlice = filtered.slice(offset, offset + perPage);
 
-  return {
-    total: totalMatched,
-    page,
-    perPage,
-    facilities: pageSlice,
-  };
+return { total, page, perPage: unlimited? total : perPage, facilities: slice }
 });
