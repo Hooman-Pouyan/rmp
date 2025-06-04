@@ -69,9 +69,9 @@ const STATE_NAMES: Record<string, string> = {
 interface MasterSubmission {
   submissionId: number;
   FacilityName: string;
-  FacilityAddress: string;         // newly added by Python
+  FacilityAddress: string; // newly added by Python
   FacilityCity: string;
-  FacilityState: string;           // abbreviation, e.g. "OH"
+  FacilityState: string; // abbreviation, e.g. "OH"
   FacilityZipCode: string;
   FacilityCountyFIPS: string;
   FacilityLatDecDegs: string;
@@ -116,7 +116,7 @@ interface FacilityResult {
   county_fips: string;
   state: { abbr: string; name: string };
   sub_last?: {
-    date_val: string;   // most recent SafetyInspectionDate
+    date_val: string; // most recent SafetyInspectionDate
     num_accidents: number;
   };
   submissions: Array<{
@@ -135,6 +135,7 @@ interface FacilityResult {
   lat: number | null;
   lon: number | null;
   name_for_map: string;
+  ParentCompanyName: string;
   city_for_map: string;
   state_for_map: string;
   lastDate_for_map?: string;
@@ -241,6 +242,7 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
       lat: exemplar.FRS_Lat,
       lon: exemplar.FRS_Long,
       name_for_map: exemplar.FacilityName,
+      ParentCompanyName: exemplar.ParentCompanyName || "N/A",
       city_for_map: city,
       state_for_map: stateAbbr,
       lastDate_for_map: latestSub.SafetyInspectionDate ?? undefined,
@@ -254,6 +256,7 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
 
 export default defineEventHandler(async (event: H3Event) => {
   const q = getQuery(event) as Record<string, string | string[]>;
+  console.log({ q });
 
   // ────────────────────────────────────────────────────────────────────────────
   // 1) Helper functions to parse query‐string filters
@@ -267,7 +270,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const facilityNameQ = first(q.facilityName).trim().toLowerCase();
   const exactName = toBool(q.exactFacilityName);
   const facilityIdQ = first(q.facilityId).trim();
-  const parentCompanyQ = first(q.parentCompany).trim().toLowerCase();
+  const parentCompanyQ = first(q.ParentCompanyName).trim().toLowerCase();
   const exactParent = toBool(q.exactParent);
   const facilityDUNSQ = first(q.facilityDUNS).trim();
 

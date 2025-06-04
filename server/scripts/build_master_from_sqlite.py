@@ -8,7 +8,7 @@ from pathlib import Path
 # ──────────────────────────────────────────────────────────────────────────────
 # ADJUST these paths if your repo layout is different:
 DB_PATH      = Path("db/RMPData.sqlite")
-OUTPUT_JSON  = Path("static/data/master_submissions.json")  # ensure this matches “static/data/…” from search API
+OUTPUT_JSON  = Path("../static/data/master_submissions.json")  # ensure this matches “static/data/…” from search API
 # ──────────────────────────────────────────────────────────────────────────────
 
 # 1) Top‐level columns to keep from tblS1Facilities (must match your SQLite column names).

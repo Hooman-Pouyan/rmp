@@ -123,7 +123,7 @@ function goto(p: number) {
         <th>Facility</th>
         <th>State</th>
         <th>City</th>
-        <th>Address</th>
+        <th>Parent Company</th>
         <th>Last Validated</th>
         <th>Accidents</th>
       </tr>
@@ -136,7 +136,7 @@ function goto(p: number) {
         </td>
         <td>{{ r.state.name }}</td>
         <td>{{ r.city }}</td>
-        <td>{{ r.address }}</td>
+        <td>{{ (r as any).ParentCompanyName }}</td>
         <td>{{ r.sub_last?.date_val ?? '—' }}</td>
         <td>{{ r.sub_last?.num_accidents ?? '—' }}</td>
       </tr>

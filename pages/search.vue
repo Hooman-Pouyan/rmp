@@ -15,7 +15,7 @@ const filters: any = reactive({
   facilityName: '',
   exactFacilityName: false,
   facilityId: '',
-  parentCompany: '',
+  ParentCompanyName: '',
   exactParent: false,
   facilityDUNS: '',
   activeOnly: false,
