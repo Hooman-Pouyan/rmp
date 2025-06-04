@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 const props = defineProps<{ modelValue: any }>()
 const emit  = defineEmits<{ (e:'update:modelValue', v:any): void }>()
 
@@ -7,20 +9,29 @@ function set(key: string, val: any) {
 }
 const f = props.modelValue
 
-// example lists; replace with your real data
-const chemicalsList = [
-  { id: 'NH3', name: 'Ammonia' },
-  { id: 'CL2', name: 'Chlorine' },
-  { id: 'HCL', name: 'Hydrochloric Acid' },
-  { id: 'CH3OH', name: 'Methanol' }
-]
+interface Option { id: string; name: string }
 
-const naicsList = [
-  { id: '211120', name: '211120 – Crude Petroleum Extraction' },
-  { id: '325412', name: '325412 – Pharmaceutical Preparation Manufacturing' },
-  { id: '325199', name: '325199 – Basic Organic Chemical Manufacturing' },
-  { id: '332710', name: '332710 – Machine Shops' }
-]
+/* Reactive option lists (filled onMounted) */
+const chemicalsList = ref<Option[]>([])
+const naicsList     = ref<Option[]>([])
+
+onMounted(async () => {
+  /* 1️⃣  Load dictionaries once (bundled via Nuxt static folder) */
+  const { default: lookups } = await import('~/static/data/lookups.json')
+
+  /* 2️⃣  Chemicals — show short name, keep ChemicalID as value */
+  chemicalsList.value = Object.entries(lookups.ChemicalID)
+    .map(([id, full]) => {
+      const short = String(full).split('[')[0].trim()
+      return { id, name: short }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  /* 3️⃣  NAICS — prepend code so users can search visually */
+  naicsList.value = Object.entries(lookups.NAICSCode)
+    .map(([id, txt]) => ({ id, name: `${id} – ${String(txt)}` }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+})
 </script>
 
 <template>
@@ -28,7 +39,7 @@ const naicsList = [
     <legend class="usa-legend margin-top-0">Process</legend>
 
     <div class="grid-row grid-gap">
-      <!-- Chemical(s) as a normal dropdown -->
+      <!-- Chemical(s) -->
       <div class="tablet:grid-col-6">
         <label class="usa-label" for="chemicals">Chemical(s)</label>
         <select
@@ -71,13 +82,13 @@ const naicsList = [
           @change="e => set('programLevel', e.target.value)"
         >
           <option value="">Select Program Level</option>
-          <option value="1">Program 1</option>
-          <option value="2">Program 2</option>
-          <option value="3">Program 3</option>
+          <option value="1">Program&nbsp;1</option>
+          <option value="2">Program&nbsp;2</option>
+          <option value="3">Program&nbsp;3</option>
         </select>
       </div>
 
-      <!-- NAICS Code(s) as a normal dropdown -->
+      <!-- NAICS Code(s) -->
       <div class="tablet:grid-col-6">
         <label class="usa-label" for="naicsCodes">NAICS Code(s)</label>
         <select
@@ -98,5 +109,6 @@ const naicsList = [
 
 <style scoped>
 .margin-bottom-2 { margin-bottom: 1.5rem; }
-.margin-top-2 { margin-top: 1.5rem; }
+.margin-top-0   { margin-top:     0; }
+.margin-top-2   { margin-top:  1.5rem; }
 </style>
