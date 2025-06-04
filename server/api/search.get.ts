@@ -126,6 +126,7 @@ interface FacilityResult {
   lat: number | null;
   lon: number | null;
   name_for_map: string;
+  ParentCompanyName: string;
   city_for_map: string;
   state_for_map: string;
   lastDate_for_map?: string;
@@ -223,6 +224,7 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
       lat: exemplar.FRS_Lat,
       lon: exemplar.FRS_Long,
       name_for_map: exemplar.FacilityName,
+      ParentCompanyName: exemplar.ParentCompanyName || "N/A",
       city_for_map: city,
       state_for_map: stateAbbr,
       lastDate_for_map: latestSub.SafetyInspectionDate ?? undefined,
@@ -236,6 +238,7 @@ async function loadAndIndexMaster(): Promise<FacilityResult[]> {
 
 export default defineEventHandler(async (event: H3Event) => {
   const q = getQuery(event) as Record<string, string | string[]>;
+  console.log({ q });
 
   const first = (v: string | string[] | undefined): string =>
     Array.isArray(v) ? v[0] : v || "";
@@ -246,7 +249,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const facilityNameQ = first(q.facilityName).trim().toLowerCase();
   const exactName = toBool(q.exactFacilityName);
   const facilityIdQ = first(q.facilityId).trim();
-  const parentCompanyQ = first(q.parentCompany).trim().toLowerCase();
+  const parentCompanyQ = first(q.ParentCompanyName).trim().toLowerCase();
   const exactParent = toBool(q.exactParent);
   const facilityDUNSQ = first(q.facilityDUNS).trim();
 

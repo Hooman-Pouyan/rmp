@@ -1,14 +1,14 @@
 <template>
   <footer class="drexel-footer " role="contentinfo">
     <div class="footer-container">
-      <div class="footer-brand">
+      <!-- <div class="footer-brand">
         <img
           src="../../assets/styles/images/epa-seal.svg"
           alt="United States Environmental Protection Agency"
           width="100"
           height="100"
         />
-      </div>
+      </div> -->
 
       <div class="footer-columns">
         <!-- Column: Discover -->
@@ -55,11 +55,11 @@
 
           <h2>Follow.</h2>
           <ul class="footer-social">
-            <li><a href="https://www.facebook.com/EPA" aria-label="Facebook"><svg><use xlink:href="../../assets/styles/images/sprite.artifact.svg#facebook-square"></use></svg></a></li>
-            <li><a href="https://twitter.com/epa" aria-label="Twitter"><svg><use xlink:href="../../assets/styles/images/sprite.artifact.svg#twitter-square"></use></svg></a></li>
-            <li><a href="https://www.youtube.com/user/USEPAgov" aria-label="YouTube"><svg><use xlink:href="../../assets/styles/images/sprite.artifact.svg#youtube-square"></use></svg></a></li>
-            <li><a href="https://www.flickr.com/photos/usepagov" aria-label="Flickr"><svg><use xlink:href="../../assets/styles/images/sprite.artifact.svg#flickr-square"></use></svg></a></li>
-            <li><a href="https://www.instagram.com/epagov" aria-label="Instagram"><svg><use xlink:href="../../assets/styles/images/sprite.artifact.svg#instagram-square"></use></svg></a></li>
+            <li><a href="https://www.facebook.com/EPA" aria-label="Facebook"></a></li>
+            <li><a href="https://twitter.com/epa" aria-label="Twitter"></a></li>
+            <li><a href="https://www.youtube.com/user/USEPAgov" aria-label="YouTube"></a></li>
+            <li><a href="https://www.flickr.com/photos/usepagov" aria-label="Flickr"></a></li>
+            <li><a href="https://www.instagram.com/epagov" aria-label="Instagram"></a></li>
           </ul>
 
           <p class="footer-updated">Last updated on July 16, 2021</p>

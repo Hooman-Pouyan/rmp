@@ -48,8 +48,8 @@ const f = props.modelValue
       <div class="tablet:grid-col-6 margin-top-2">
         <label class="usa-label" for="parent">Parent Company Name</label>
         <input id="parent" class="usa-input"
-               :value="f.parentCompany"
-               @input="e=>set('parentCompany',(e.target as HTMLInputElement).value)" />
+               :value="f.ParentCompanyName"
+               @input="e=>set('ParentCompanyName',(e.target as HTMLInputElement).value)" />
 
         <div class="margin-top-1">
           <label class="usa-radio margin-right-2">
