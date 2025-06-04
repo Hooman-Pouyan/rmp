@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   ],
   dir: {
     pages: "pages",
-    assets: "data"
+    assets: "data",
   },
   nitro: {
     // expose ./data + ./db to Nitro (server) bundle
@@ -31,6 +31,7 @@ export default defineNuxtConfig({
       esriApiKey: process.env.NUXT_PUBLIC_ESRI_API_KEY || "",
     },
   },
+
   build: {
     transpile: ["vue-uswds"],
   },
@@ -43,5 +44,6 @@ export default defineNuxtConfig({
         autoImportComponents: true,
       },
     ],
+    "@nuxthub/core",
   ],
 });
