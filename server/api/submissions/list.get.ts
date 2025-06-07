@@ -1,79 +1,70 @@
-import { db } from "../../utils/drizzle.server"; // Assuming path
+import { db } from "../../utils/drizzle.server"; // Adjust path accordingly
 import {
-  tblS1Processes,
-  tblS1ProcessChemicals,
-  tblS1Process_Naics,
-  tblS9EmergencyResponses,
-  tblS1Facilities,
-  tlkpChemicals,
-} from "../../db/schema"; // Adjust path accordingly
-import { sql } from "drizzle-orm";
+  tbls1Facilities,
+  tbls1Processes,
+  tbls1Processchemicals,
+  tbls1ProcessNaics,
+  tbls9Emergencyresponses,
+  tlkpchemicals,
+} from "../../../drizzle/schema"; // Adjust path accordingly
+import { eq } from "drizzle-orm";
 
 const getAllSubmissionsWithDetails = async () => {
-  // Query for fetching submissions with process and emergency response details
-  const submissions = db
+  const submissions = await db
     .select({
-      submissionId: tblS1Facilities.facilityId,
-      facilityName: tblS1Facilities.facilityName,
-      facilityId: tblS1Facilities.epaFacilityId,
-      address: tblS1Facilities.facilityStr1,
-      state: tblS1Facilities.facilityState,
-      city: tblS1Facilities.facilityCity,
-      zipcode: tblS1Facilities.facilityZipCode,
-      facilityURL: tblS1Facilities.facilityUrl,
-      facilityLat: tblS1Facilities.facilityLatDecDegs,
-      facilityLong: tblS1Facilities.facilityLongDecDegs,
-      parentCompanyName: tblS1Facilities.parentCompanyName,
-      facilityDUNS: tblS1Facilities.facilityDuns,
-      operatorName: tblS1Facilities.operatorName,
-      noAccidents: tblS1Facilities.noAccidents,
-      programLevel: tblS1Processes.programLevel,
-      chemicals: sql`(
-      SELECT json_group_array(
-        json_object(
-          'chemicalId', tblS1ProcessChemicals.chemicalId,
-          'quantity', tblS1ProcessChemicals.quantity,
-          'chemicalName', tlkpChemicals.chemicalName
-        )
-      )
-      FROM tblS1ProcessChemicals
-      LEFT JOIN tlkpChemicals ON tlkpChemicals.chemicalId = tblS1ProcessChemicals.chemicalId
-      WHERE tblS1ProcessChemicals.processId = tblS1Processes.processId
-    )`.as("chemicals"),
-      naicsCode: sql`(
-      SELECT json_group_array(tblS1Process_Naics.naicsCode)
-      FROM tblS1Process_Naics
-      WHERE tblS1Process_Naics.processId = tblS1Processes.processId
-    )`.as("naicsCode"),
+      submissionId: tbls1Facilities.facilityId,
+      facilityName: tbls1Facilities.facilityName,
+      facilityId: tbls1Facilities.epaFacilityId,
+      address: tbls1Facilities.facilityStr1,
+      state: tbls1Facilities.facilityState,
+      city: tbls1Facilities.facilityCity,
+      zipcode: tbls1Facilities.facilityZipCode,
+      facilityURL: tbls1Facilities.facilityUrl,
+      facilityLat: tbls1Facilities.facilityLatDecDegs,
+      facilityLong: tbls1Facilities.facilityLongDecDegs,
+      parentCompanyName: tbls1Facilities.parentCompanyName,
+      facilityDUNS: tbls1Facilities.facilityDuns,
+      operatorName: tbls1Facilities.operatorName,
+      noAccidents: tbls1Facilities.noAccidents,
+      programLevel: tbls1Processes.programLevel,
+
+      // // Aggregating chemicals for each facility
+      // chemicals: db
+      //   .select({
+      //     chemicalId: tbls1Processchemicals.chemicalId,
+      //     quantity: tbls1Processchemicals.quantity,
+      //     chemicalName: tlkpchemicals.chemicalName,
+      //   })
+      //   .from(tbls1Processchemicals)
+      //   .leftJoin(tlkpchemicals, eq(tlkpchemicals.chemicalId, tbls1Processchemicals.chemicalId))
+      //   .where(eq(tbls1Processchemicals.processId, tbls1Processes.processId))
+      //   .groupBy(tbls1Processchemicals.processId)  // Grouping by the processId to aggregate
+      //   .as("chemicals"),  // Alias for the aggregation
+
+      // // Aggregating naicsCode for each process
+      // naicsCode: db
+      //   .select({
+      //     naicsCode: tbls1ProcessNaics.naicsCode,
+      //   })
+      //   .from(tbls1ProcessNaics)
+      //   .where(eq(tbls1ProcessNaics.processId, tbls1Processes.processId))
+      //   .groupBy(tbls1ProcessNaics.processId)  // Grouping by the processId
+      //   .as("naicsCode"),  // Alias for the aggregation
     })
-    .from(tblS1Facilities)
-    .leftJoin(
-      tblS1Processes,
-      sql`${tblS1Processes.facilityId} = ${tblS1Facilities.facilityId}`
-    )
-    .leftJoin(
-      tblS1Process_Naics,
-      sql`${tblS1Processes.processId} = ${tblS1Process_Naics.processId}`
-    )
-    .leftJoin(
-      tblS1ProcessChemicals,
-      sql`${tblS1Processes.processId} = ${tblS1ProcessChemicals.processId}`
-    )
-    .leftJoin(
-      tlkpChemicals,
-      sql`${tblS1ProcessChemicals.chemicalId} = ${tlkpChemicals.chemicalId}`
-    )
-    .leftJoin(
-      tblS9EmergencyResponses,
-      sql`${tblS1Facilities.facilityId} = ${tblS9EmergencyResponses.facilityId}`
-    )
-    .all();
+    .from(tbls1Facilities)
+    .leftJoin(tbls1Processes, eq(tbls1Processes.facilityId, tbls1Facilities.facilityId))
+    .leftJoin(tbls1ProcessNaics, eq(tbls1Processes.processId, tbls1ProcessNaics.processId))
+    .leftJoin(tbls1Processchemicals, eq(tbls1Processes.processId, tbls1Processchemicals.processId))
+    .leftJoin(tlkpchemicals, eq(tbls1Processchemicals.chemicalId, tlkpchemicals.chemicalId))
+    .leftJoin(tbls9Emergencyresponses, eq(tbls1Facilities.facilityId, tbls9Emergencyresponses.facilityId))
+    .execute();
 
   return submissions;
 };
 
+
+// API handler
 export default defineEventHandler(async () => {
   const submissions = await getAllSubmissionsWithDetails();
-
-  return submissions; // Return a list of all submissions with process and emergency response details
+  return submissions; // Return the submissions data
 });
