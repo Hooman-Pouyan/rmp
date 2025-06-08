@@ -3,24 +3,37 @@ import { useFetch }    from '#app'
 
 /* ---- types that mirror API responses ---------------------------------- */
 export interface FacilityLite {
-  EPAFacilityID: string
-  name: string
-  city: string
-  state: { name:string; abbr:string }
-  zip: string
-  address?:    string
-  company_1?:  string
-  company_2?:  string
-  county_fips?:string
-  sub_last?: {
-    id?: string
-    date_val?: string
-    date_dereg?: string
-    lat_sub?: number
-    lon_sub?: number
-    num_accidents?: number
-    latest_accident?: string
-  }
+  facilityId: string;
+  facilityName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipcode: string;
+  facilityURL: string | null;
+  facilityLat: string;
+  facilityLong: string;
+  parentCompanyName: string | null;
+  facilityDUNS: number | null;
+  operatorName: string;
+  noAccidents: string;
+  programLevel: number;
+
+  accidents: Array<{
+    accidentHistoryId: number;
+    accidentDate: string;
+    accidentTime: string;
+    // Add more fields if needed later
+  }> | null;
+
+  submissions: Array<{
+    submissionId: number;
+    chemicals: Array<{
+      chemicalId: number;
+      quantity: number;
+      chemicalName: string;
+    }>;
+    naicsCode: string[];
+  }>;
 }
 interface SearchResponse {
   total: number
@@ -33,13 +46,13 @@ interface SearchResponse {
 export const useFacilitiesStore = defineStore('fac', {
   state: () => ({
     /* paginated list for ResultsTable */
-    results : [] as FacilityLite[],
+    results : [] as FacilityLite[] | any,
     total   : 0,
     page    : 1,
     perPage : 20,
 
     /* complete list for the map */
-    allFacilities: [] as FacilityLite[],
+    allFacilities: [] as FacilityLite[] | any,
 
     /* last filter payload */
     filters : {} as Record<string,any>,

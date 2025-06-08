@@ -1,397 +1,264 @@
-// // server/api/search.get.ts
+// server/api/search.get.ts
+import { defineEventHandler, getQuery } from 'h3'
+import { db } from '../utils/drizzle.server'
+import {
+  tbls1Facilities,
+  tbls1Processes,
+  tbls1Processchemicals,
+  tbls1ProcessNaics,
+  tbls6Accidenthistory,
+  tlkpchemicals,
+} from '../../drizzle/schema'
+import { eq, ilike, and, sql, inArray } from 'drizzle-orm'
 
-// import { readFile } from "fs/promises";
-// import { defineEventHandler, getQuery, createError } from "h3";
-// import type { H3Event } from "h3";
-// import { join } from "path";
+export default defineEventHandler(async (event) => {
+  // 1) Parse & normalize query params
+  const q = getQuery(event) as Record<string, string | string[] | undefined>
+  const first = (v?: string | string[]) => Array.isArray(v) ? v[0] : (v || '')
+  const toBool = (v?: string | string[]) => first(v).toLowerCase() === 'true'
 
-// const STATE_NAMES: Record<string, string> = {
-//   AL: "Alabama",
-//   AK: "Alaska",
-//   AZ: "Arizona",
-//   AR: "Arkansas",
-//   CA: "California",
-//   CO: "Colorado",
-//   CT: "Connecticut",
-//   DE: "Delaware",
-//   FL: "Florida",
-//   GA: "Georgia",
-//   HI: "Hawaii",
-//   ID: "Idaho",
-//   IL: "Illinois",
-//   IN: "Indiana",
-//   IA: "Iowa",
-//   KS: "Kansas",
-//   KY: "Kentucky",
-//   LA: "Louisiana",
-//   ME: "Maine",
-//   MD: "Maryland",
-//   MA: "Massachusetts",
-//   MI: "Michigan",
-//   MN: "Minnesota",
-//   MS: "Mississippi",
-//   MO: "Missouri",
-//   MT: "Montana",
-//   NE: "Nebraska",
-//   NV: "Nevada",
-//   NH: "New Hampshire",
-//   NJ: "New Jersey",
-//   NM: "New Mexico",
-//   NY: "New York",
-//   NC: "North Carolina",
-//   ND: "North Dakota",
-//   OH: "Ohio",
-//   OK: "Oklahoma",
-//   OR: "Oregon",
-//   PA: "Pennsylvania",
-//   RI: "Rhode Island",
-//   SC: "South Carolina",
-//   SD: "South Dakota",
-//   TN: "Tennessee",
-//   TX: "Texas",
-//   UT: "Utah",
-//   VT: "Vermont",
-//   VA: "Virginia",
-//   WA: "Washington",
-//   WV: "West Virginia",
-//   WI: "Wisconsin",
-//   WY: "Wyoming",
-// };
+  // facility‐level filters
+  const facilityName      = first(q.facilityName).trim()
+  const exactFacilityName = toBool(q.exactFacilityName)
+  const facilityIdFilter  = first(q.facilityId).trim()
+  const parentCompany     = first(q.ParentCompanyName).trim()
+  const exactParent       = toBool(q.exactParent)
+  const facilityDUNS      = first(q.facilityDUNS).trim()
+  const address           = first(q.address).trim()
+  const exactAddress      = toBool(q.exactAddress)
+  const city              = first(q.city).trim()
+  const state             = first(q.state).toUpperCase().trim()
+  const zip               = first(q.zip).trim()
 
-// interface MasterSubmission {
-//   submissionId: number;
-//   FacilityName: string;
-//   FacilityAddress: string;
-//   FacilityCity: string;
-//   FacilityState: string;
-//   FacilityZipCode: string;
-//   FacilityCountyFIPS: string;
-//   FacilityLatDecDegs: string;
-//   FacilityLongDecDegs: string;
-//   ValidLatLongFlag: string;
-//   LatLongMethod: string;
-//   LatLongDescription: string;
-//   FacilityURL: string | null;
-//   FacilityDUNS: string | null;
-//   ParentCompanyName: string | null;
-//   Company2Name: string | null;
-//   CompanyDUNS: string | null;
-//   Company2DUNS: string | null;
-//   OperatorName: string;
-//   EPAFacilityID: string;
-//   SafetyInspectionDate: string | null;
-//   SafetyInspectionBy: string | null;
-//   SubmissionType: string;
-//   RMPDescription: string | null;
-//   NoAccidents: string;
-//   ForeignCountry: string | null;
-//   FRS_Lat: number | null;
-//   FRS_Long: number | null;
-//   processes: Array<{
-//     ProcessID: number;
-//     ProgramLevel: number;
-//     chemicals: Array<{ ProcessChemicalID: number; ChemicalID: number }>;
-//     naics: Array<{ NAICSCode: string }>;
-//     MH_ToxicRelease: boolean;
-//   }>;
-//   accidents?: Record<string, any>[];
-// }
+  // process‐level filters
+  const chemicalIds = Array.isArray(q.chemicals)
+    ? q.chemicals.map(Number)
+    : first(q.chemicals)
+      ? [Number(first(q.chemicals))]
+      : []
 
-// interface FacilityResult {
-//   EPAFacilityID: string;
-//   name: string;
-//   address: string;
-//   city: string;
-//   county_fips: string;
-//   state: { abbr: string; name: string };
-//   zip: string;
-//   facilityDUNS: string | null;
-//   parentCompany: string | null;
-//   sub_last?: {
-//     date_val: string;
-//     num_accidents: number;
-//   };
-//   submissions: Array<{
-//     submissionId: number;
-//     SafetyInspectionDate: string | null;
-//     num_accidents: number;
-//     processes: Array<{
-//       ProcessID: number;
-//       ProgramLevel: number;
-//       chemicals: Array<{ ProcessChemicalID: number; ChemicalID: number }>;
-//       naics: Array<{ NAICSCode: string }>;
-//       MH_ToxicRelease: boolean;
-//     }>;
-//   }>;
-//   lat: number | null;
-//   lon: number | null;
-//   name_for_map: string;
-//   ParentCompanyName: string;
-//   city_for_map: string;
-//   state_for_map: string;
-//   lastDate_for_map?: string;
-//   accidents_for_map: number;
-// }
+  const programLevelFilter = first(q.programLevel)
+    ? Number(first(q.programLevel))
+    : null
 
-// let __cachedMaster: FacilityResult[] | null = null;
+  const naicsCodesFilter = Array.isArray(q.naicsCodes)
+    ? q.naicsCodes
+    : first(q.naicsCodes)
+      ? [first(q.naicsCodes)]
+      : []
 
-// async function loadAndIndexMaster(): Promise<FacilityResult[]> {
-//   if (__cachedMaster) return __cachedMaster;
+  // pagination
+  const page    = Math.max(1, parseInt(first(q.page) || '1', 10))
+  const perPage = first(q.perPage)?.toLowerCase() === 'all'
+    ? Number.MAX_SAFE_INTEGER
+    : Math.max(1, parseInt(first(q.perPage) || '20', 10))
+  const offset = (page - 1) * perPage
 
-//   const jsonPath = join(process.cwd(), "static/data/master_submissions.json");
-//   let raw: string;
-//   try {
-//     raw = await readFile(jsonPath, "utf-8");
-//   } catch {
-//     throw createError({
-//       statusCode: 500,
-//       message: `Cannot load master JSON at ${jsonPath}`,
-//     });
-//   }
+  // 2) Build facility WHERE clauses
+  const facWhere: any[] = []
+  if (facilityName) {
+    facWhere.push(
+      exactFacilityName
+        ? eq(sql`lower(${tbls1Facilities.facilityName})`, facilityName.toLowerCase())
+        : ilike(tbls1Facilities.facilityName, `%${facilityName}%`)
+    )
+  }
+  if (facilityIdFilter) facWhere.push(eq(tbls1Facilities.epaFacilityId, facilityIdFilter))
+  if (parentCompany) {
+    facWhere.push(
+      exactParent
+        ? eq(sql`lower(${tbls1Facilities.parentCompanyName})`, parentCompany.toLowerCase())
+        : ilike(tbls1Facilities.parentCompanyName, `%${parentCompany}%`)
+    )
+  }
+  if (facilityDUNS) facWhere.push(eq(tbls1Facilities.facilityDuns, Number(facilityDUNS)))
+  if (address) {
+    facWhere.push(
+      exactAddress
+        ? eq(sql`lower(${tbls1Facilities.facilityStr1})`, address.toLowerCase())
+        : ilike(tbls1Facilities.facilityStr1, `%${address}%`)
+    )
+  }
+  if (city)  facWhere.push(eq(sql`lower(${tbls1Facilities.facilityCity})`, city.toLowerCase()))
+  if (state) facWhere.push(eq(tbls1Facilities.facilityState, state))
+  if (zip)   facWhere.push(eq(tbls1Facilities.facilityZipCode, zip))
 
-//   const allSubs: MasterSubmission[] = JSON.parse(raw);
-//   const grouped = new Map<string, MasterSubmission[]>();
+  // 3) Build process WHERE clauses
+  const procWhere: any[] = []
+  if (programLevelFilter !== null) procWhere.push(eq(tbls1Processes.programLevel, programLevelFilter))
+  if (chemicalIds.length)     procWhere.push(inArray(tbls1Processchemicals.chemicalId, chemicalIds))
+  if (naicsCodesFilter.length) procWhere.push(inArray(tbls1ProcessNaics.naicsCode, naicsCodesFilter))
 
-//   for (const sub of allSubs) {
-//     const key = sub.EPAFacilityID;
-//     if (!grouped.has(key)) grouped.set(key, []);
-//     grouped.get(key)!.push(sub);
-//   }
+  // 4) Get total # of matching facilities
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(distinct ${tbls1Facilities.epaFacilityId})`.mapWith(Number) })
+    .from(tbls1Facilities)
+    .leftJoin(tbls1Processes,         eq(tbls1Processes.facilityId, tbls1Facilities.facilityId))
+    .leftJoin(tbls1Processchemicals,  eq(tbls1Processchemicals.processId, tbls1Processes.processId))
+    .leftJoin(tbls1ProcessNaics,      eq(tbls1ProcessNaics.processId, tbls1Processes.processId))
+    .where(and(...facWhere, ...procWhere))
+    .execute()
+  const total = count || 0
 
-//   const facilities: FacilityResult[] = [];
+  // 5) Pick one page of EPAFacilityIDs
+  const paged = db
+    .select({ epaId: tbls1Facilities.epaFacilityId })
+    .from(tbls1Facilities)
+    .leftJoin(tbls1Processes,         eq(tbls1Processes.facilityId, tbls1Facilities.facilityId))
+    .leftJoin(tbls1Processchemicals,  eq(tbls1Processchemicals.processId, tbls1Processes.processId))
+    .leftJoin(tbls1ProcessNaics,      eq(tbls1ProcessNaics.processId, tbls1Processes.processId))
+    .where(and(...facWhere, ...procWhere))
+    .groupBy(tbls1Facilities.epaFacilityId)
+    .orderBy(tbls1Facilities.epaFacilityId)
+    .limit(perPage)
+    .offset(offset)
+    .as('paged')
 
-//   for (const [epaId, submissions] of grouped.entries()) {
-//     const exemplar = submissions[0];
-//     const city = exemplar.FacilityCity;
-//     const stateAbbr = exemplar.FacilityState;
-//     const county = exemplar.FacilityCountyFIPS;
-//     const address = exemplar.FacilityAddress;
-//     const zip = exemplar.FacilityZipCode;
-//     const facilityDUNS = exemplar.FacilityDUNS;
-//     const parentCompany = exemplar.ParentCompanyName;
+  // 6) Fetch facility headers
+  const facRows = await db
+    .select({
+      facilityId:        tbls1Facilities.epaFacilityId,
+      facilityName:      tbls1Facilities.facilityName,
+      address:           tbls1Facilities.facilityStr1,
+      city:              tbls1Facilities.facilityCity,
+      state:             tbls1Facilities.facilityState,
+      zipcode:           tbls1Facilities.facilityZipCode,
+      facilityURL:       tbls1Facilities.facilityUrl,
+      facilityLat:       tbls1Facilities.facilityLatDecDegs,
+      facilityLong:      tbls1Facilities.facilityLongDecDegs,
+      parentCompanyName: tbls1Facilities.parentCompanyName,
+      facilityDUNS:      tbls1Facilities.facilityDuns,
+      operatorName:      tbls1Facilities.operatorName,
+      noAccidents:       tbls1Facilities.noAccidents,
+    })
+    .from(tbls1Facilities)
+    .innerJoin(paged, eq(tbls1Facilities.epaFacilityId, paged.epaId))
+    .execute()
 
-//     const sortedByDate = submissions.slice().sort((a, b) => {
-//       const da = a.SafetyInspectionDate;
-//       const db = b.SafetyInspectionDate;
-//       if (!da && !db) return 0;
-//       if (!da) return 1;
-//       if (!db) return -1;
-//       return db.localeCompare(da);
-//     });
-//     const latestSub = sortedByDate[0];
+  // 7) Fetch all chemicals / NAICS / programLevels for those EPA IDs
+  const subRows = await db
+    .select({
+      facilityId:   tbls1Facilities.epaFacilityId,
+      chemicalId:   tbls1Processchemicals.chemicalId,
+      quantity:     tbls1Processchemicals.quantity,
+      chemicalName: tlkpchemicals.chemicalName,
+      naicsCode:    tbls1ProcessNaics.naicsCode,
+      programLevel: tbls1Processes.programLevel,
+    })
+    .from(tbls1Processes)
+    .innerJoin(tbls1Facilities,       eq(tbls1Processes.facilityId, tbls1Facilities.facilityId))
+    .innerJoin(paged,                 eq(tbls1Facilities.epaFacilityId, paged.epaId))
+    .leftJoin(tbls1Processchemicals,  eq(tbls1Processes.processId, tbls1Processchemicals.processId))
+    .leftJoin(tlkpchemicals,          eq(tbls1Processchemicals.chemicalId, tlkpchemicals.chemicalId))
+    .leftJoin(tbls1ProcessNaics,      eq(tbls1Processes.processId, tbls1ProcessNaics.processId))
+    .execute()
 
-//     let totalAccidents = 0;
-//     for (const s of submissions) {
-//       if (Array.isArray(s.accidents)) {
-//         totalAccidents += s.accidents.length;
-//       }
-//     }
+  // 8) Fetch all accidents (joined via the _submission_-level facilityId)
+  const accRows = await db
+    .select({
+      facilityId:           tbls1Facilities.epaFacilityId,
+      accidentHistoryId:    tbls6Accidenthistory.accidentHistoryId,
+      accidentDate:         tbls6Accidenthistory.accidentDate,
+      accidentTime:         tbls6Accidenthistory.accidentTime,
+      reGas:                tbls6Accidenthistory.reGas,
+      reSpill:              tbls6Accidenthistory.reSpill,
+      reFire:               tbls6Accidenthistory.reFire,
+      reExplosion:          tbls6Accidenthistory.reExplosion,
+      reReactiveIncident:   tbls6Accidenthistory.reReactiveIncident,
+      cfEquipmentFailure:   tbls6Accidenthistory.cfEquipmentFailure,
+      cfHumanError:         tbls6Accidenthistory.cfHumanError,
+      cfImproperProcedure:  tbls6Accidenthistory.cfImproperProcedure,
+      cfOverpressurization: tbls6Accidenthistory.cfOverpressurization,
+      cfUpsetCondition:     tbls6Accidenthistory.cfUpsetCondition,
+      cfBypassCondition:    tbls6Accidenthistory.cfBypassCondition,
+      cfMaintenance:        tbls6Accidenthistory.cfMaintenance,
+      cfProcessDesignFailure: tbls6Accidenthistory.cfProcessDesignFailure,
+      cfUnsuitableEquipment:  tbls6Accidenthistory.cfUnsuitableEquipment,
+      cfUnusualWeather:       tbls6Accidenthistory.cfUnusualWeather,
+      cfManagementError:      tbls6Accidenthistory.cfManagementError,
+      cfOther:                tbls6Accidenthistory.cfOther,
+    })
+    .from(tbls6Accidenthistory)
+    .innerJoin(tbls1Facilities, eq(tbls6Accidenthistory.facilityId, tbls1Facilities.facilityId))
+    .innerJoin(paged,            eq(tbls1Facilities.epaFacilityId, paged.epaId))
+    .execute()
 
-//     const subsForApi = submissions.map((s) => ({
-//       submissionId: s.submissionId,
-//       SafetyInspectionDate: s.SafetyInspectionDate,
-//       num_accidents: Array.isArray(s.accidents) ? s.accidents.length : 0,
-//       processes: s.processes.map((p) => ({
-//         ProcessID: p.ProcessID,
-//         ProgramLevel: p.ProgramLevel,
-//         chemicals: p.chemicals.slice(),
-//         naics: p.naics.slice(),
-//         MH_ToxicRelease: p.MH_ToxicRelease,
-//       })),
-//     }));
+  // 9) JS‐side assembly
+  const facMap: Record<string, any> = {}
+  facRows.forEach(f => {
+    facMap[f.facilityId] = {
+      ...f,
+      chemicals:    [] as any[],
+      naicsCode:    null as string|null,
+      programLevel: null as number|null,
+      accidents:    [] as any[],
+    }
+  })
 
-//     facilities.push({
-//       EPAFacilityID: epaId,
-//       name: exemplar.FacilityName,
-//       address,
-//       city,
-//       county_fips: county,
-//       state: {
-//         abbr: stateAbbr,
-//         name: STATE_NAMES[stateAbbr] || stateAbbr,
-//       },
-//       zip,
-//       facilityDUNS,
-//       parentCompany,
-//       sub_last:
-//         latestSub.SafetyInspectionDate !== null
-//           ? {
-//               date_val: latestSub.SafetyInspectionDate!,
-//               num_accidents: latestSub.accidents?.length ?? 0,
-//             }
-//           : undefined,
-//       submissions: subsForApi,
-//       lat: exemplar.FRS_Lat,
-//       lon: exemplar.FRS_Long,
-//       name_for_map: exemplar.FacilityName,
-//       ParentCompanyName: exemplar.ParentCompanyName || "N/A",
-//       city_for_map: city,
-//       state_for_map: stateAbbr,
-//       lastDate_for_map: latestSub.SafetyInspectionDate ?? undefined,
-//       accidents_for_map: totalAccidents,
-//     });
-//   }
+  // collect chemicals, first NAICS, highest programLevel
+  subRows.forEach(s => {
+    const fac = facMap[s.facilityId]
+    if (!fac) return
+    if (s.chemicalId != null && !fac.chemicals.some((c: any) => c.chemicalId === s.chemicalId)) {
+      fac.chemicals.push({
+        chemicalId:   s.chemicalId,
+        quantity:     s.quantity,
+        chemicalName: s.chemicalName,
+      })
+    }
+    if (!fac.naicsCode && s.naicsCode) {
+      fac.naicsCode = s.naicsCode
+    }
+    if (s.programLevel != null) {
+      fac.programLevel = fac.programLevel == null
+        ? s.programLevel
+        : Math.max(fac.programLevel, s.programLevel)
+    }
+  })
 
-//   __cachedMaster = facilities;
-//   return facilities;
-// }
+  // collect accidents
+  accRows.forEach(a => {
+    const fac = facMap[a.facilityId]
+    if (!fac) return
+    if (
+      a.accidentHistoryId != null &&
+      !fac.accidents.some((x: any) => x.accidentHistoryId === a.accidentHistoryId)
+    ) {
+      fac.accidents.push({
+        accidentHistoryId:   a.accidentHistoryId,
+        accidentDate:        a.accidentDate,
+        accidentTime:        a.accidentTime,
+        reGas:               a.reGas,
+        reSpill:             a.reSpill,
+        reFire:              a.reFire,
+        reExplosion:         a.reExplosion,
+        reReactiveIncident:  a.reReactiveIncident,
+        cfEquipmentFailure:  a.cfEquipmentFailure,
+        cfHumanError:        a.cfHumanError,
+        cfImproperProcedure: a.cfImproperProcedure,
+        cfOverpressurization:a.cfOverpressurization,
+        cfUpsetCondition:    a.cfUpsetCondition,
+        cfBypassCondition:   a.cfBypassCondition,
+        cfMaintenance:       a.cfMaintenance,
+        cfProcessDesignFailure:a.cfProcessDesignFailure,
+        cfUnsuitableEquipment:a.cfUnsuitableEquipment,
+        cfUnusualWeather:     a.cfUnusualWeather,
+        cfManagementError:    a.cfManagementError,
+        cfOther:              a.cfOther,
+      })
+    }
+  })
 
-// export default defineEventHandler(async (event: H3Event) => {
-//   const q = getQuery(event) as Record<string, string | string[]>;
-//   console.log({ q });
+  // 10) Final response
+  const facilities = Object.values(facMap).map(f => ({
+    ...f,
+    accidents: f.accidents.length ? f.accidents : null,
+  }))
 
-//   const first = (v: string | string[] | undefined): string =>
-//     Array.isArray(v) ? v[0] : v || "";
-//   const toBool = (v: string | string[] | undefined): boolean =>
-//     first(v).toLowerCase() === "true";
-
-//   // Facility‐level filters
-//   const facilityNameQ = first(q.facilityName).trim().toLowerCase();
-//   const exactName = toBool(q.exactFacilityName);
-//   const facilityIdQ = first(q.facilityId).trim();
-//   const parentCompanyQ = first(q.ParentCompanyName).trim().toLowerCase();
-//   const exactParent = toBool(q.exactParent);
-//   const facilityDUNSQ = first(q.facilityDUNS).trim();
-
-//   // Location filters
-//   const addressQ = first(q.address).trim().toLowerCase();
-//   const exactAddress = toBool(q.exactAddress);
-//   const cityQ = first(q.city).trim().toLowerCase();
-//   const stateQ = first(q.state).trim().toUpperCase();
-//   const countyQ = first(q.county).trim();
-//   const zipQ = first(q.zip).trim();
-//   const activeOnly = toBool(q.activeOnly);
-
-//   // Process‐level filters
-//   const chemicalsQ = Array.isArray(q.chemicals)
-//     ? (q.chemicals as string[])
-//     : first(q.chemicals)
-//     ? [first(q.chemicals)]
-//     : [];
-//   const programLevelQ = first(q.programLevel)
-//     ? parseInt(first(q.programLevel), 10)
-//     : null;
-//   const naicsCodesQ = Array.isArray(q.naicsCodes)
-//     ? (q.naicsCodes as string[])
-//     : first(q.naicsCodes)
-//     ? [first(q.naicsCodes)]
-//     : [];
-
-//   const perPageRaw = first(q.perPage) || "20";
-//   const unlimited = perPageRaw === "0" || perPageRaw.toLowerCase() === "all";
-//   const perPage = unlimited
-//     ? Number.MAX_SAFE_INTEGER
-//     : Math.max(1, parseInt(perPageRaw, 10));
-
-//   // Pagination
-//   const page = Math.max(1, parseInt(first(q.page) || "1", 10));
-
-//   const allFacilities = await loadAndIndexMaster();
-
-//   // 3) Facility‐level filtering
-//   let filtered = allFacilities.filter((f) => {
-//     // a) facilityName
-//     if (facilityNameQ) {
-//       const nameField = f.name.toLowerCase();
-//       if (exactName) {
-//         if (nameField !== facilityNameQ) return false;
-//       } else {
-//         if (!nameField.includes(facilityNameQ)) return false;
-//       }
-//     }
-
-//     // b) facilityId
-//     if (facilityIdQ && f.EPAFacilityID !== facilityIdQ) {
-//       return false;
-//     }
-
-//     // c) parentCompany
-//     if (parentCompanyQ) {
-//       const pc = f.parentCompany?.toLowerCase() || "";
-//       if (exactParent) {
-//         if (pc !== parentCompanyQ) return false;
-//       } else {
-//         if (!pc.includes(parentCompanyQ)) return false;
-//       }
-//     }
-
-//     // d) facilityDUNS
-//     if (facilityDUNSQ) {
-//       const duns = f.facilityDUNS || "";
-//       if (duns !== facilityDUNSQ) return false;
-//     }
-
-//     // e) address
-//     if (addressQ) {
-//       const addr = f.address.toLowerCase();
-//       if (exactAddress) {
-//         if (addr !== addressQ) return false;
-//       } else {
-//         if (!addr.includes(addressQ)) return false;
-//       }
-//     }
-
-//     // f) city
-//     if (cityQ && f.city.toLowerCase() !== cityQ) return false;
-
-//     // g) state
-//     if (stateQ && f.state.abbr !== stateQ) return false;
-
-//     // h) county
-//     if (countyQ && f.county_fips !== countyQ) return false;
-
-//     // i) zip
-//     if (zipQ && f.zip !== zipQ) return false;
-
-//     // j) activeOnly
-//     if (activeOnly && !f.sub_last?.date_val) return false;
-
-//     return true;
-//   });
-
-//   // 4) Submission‐level filtering
-//   function submissionMatches(s: FacilityResult["submissions"][0]): boolean {
-//     if (programLevelQ !== null) {
-//       const ok = s.processes.some((p) => p.ProgramLevel === programLevelQ);
-//       if (!ok) return false;
-//     }
-//     if (naicsCodesQ.length) {
-//       const ok = s.processes.some((p) =>
-//         p.naics.some((n) => naicsCodesQ.includes(n.NAICSCode))
-//       );
-//       if (!ok) return false;
-//     }
-//     if (chemicalsQ.length) {
-//       const ok = s.processes.some((p) =>
-//         p.chemicals.some((c) => chemicalsQ.includes(String(c.ChemicalID)))
-//       );
-//       if (!ok) return false;
-//     }
-//     return true;
-//   }
-
-//   if (
-//     programLevelQ !== null ||
-//     naicsCodesQ.length > 0 ||
-//     chemicalsQ.length > 0
-//   ) {
-//     filtered = filtered.filter((f) =>
-//       f.submissions.some((s) => submissionMatches(s))
-//     );
-//   }
-
-//   // 5) Pagination
-//   const total = filtered.length;
-//   const slice = unlimited
-//     ? filtered
-//     : filtered.slice((page - 1) * perPage, page * perPage);
-//   const offset = (page - 1) * perPage;
-//   const pageSlice = filtered.slice(offset, offset + perPage);
-
-//   return {
-//     total,
-//     page,
-//     perPage: unlimited ? total : perPage,
-//     facilities: slice,
-//   };
-// });
+  return {
+    total,
+    page,
+    perPage: perPage === Number.MAX_SAFE_INTEGER ? total : perPage,
+    facilities,
+  }
+})

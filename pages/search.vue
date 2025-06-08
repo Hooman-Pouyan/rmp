@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, computed }  from 'vue'
-import { useFacilitiesStore }  from '~/store/facilities.js'
+import { useFacilitiesStore, type FacilityLite }  from '~/store/facilities.js'
 
 import FacilitySection  from '~/components/search/FacilitySection.vue'
 import LocationSection  from '~/components/search/LocationSection.vue'
@@ -90,7 +90,7 @@ function onFiltersUpdate(p:any){
     <!-- map column -->
     <ArcFacilitiesMap
       :facilities="store.allFacilities"
-      :focus-ids="store.results.map(r=>r.EPAFacilityID)"
+      :focus-ids="store.results.map((r: FacilityLite)=>r.facilityId)"
     />
   </section>
 

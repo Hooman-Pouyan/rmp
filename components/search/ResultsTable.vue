@@ -128,19 +128,19 @@ function goto(p: number) {
         <th>Accidents</th>
       </tr>
     </thead>
-    <tbody>
-      <tr v-for="r in rows" :key="r.EPAFacilityID">
-        <td>{{ r.EPAFacilityID }}</td>
-        <td>
-          <NuxtLink :to="`/facility/${r.EPAFacilityID}`">{{ r.name }}</NuxtLink>
-        </td>
-        <td>{{ r.state.name }}</td>
-        <td>{{ r.city }}</td>
-        <td>{{ (r as any).ParentCompanyName }}</td>
-        <td>{{ r.sub_last?.date_val ?? '—' }}</td>
-        <td>{{ r.sub_last?.num_accidents ?? '—' }}</td>
-      </tr>
-    </tbody>
+<tbody>
+  <tr v-for="r in rows" :key="r.facilityId">
+    <td>{{ r.facilityId }}</td>
+    <td>
+      <NuxtLink :to="`/facility/${r.facilityId}`">{{ r.facilityName }}</NuxtLink>
+    </td>
+    <td>{{ r.state }}</td>
+    <td>{{ r.city }}</td>
+    <td>{{ r.parentCompanyName || '—' }}</td>
+    <td>—</td> <!-- You can replace this with a valid field if you later store last submission date -->
+    <td>{{ r.accidents?.length ?? 0 }}</td>
+  </tr>
+</tbody>
   </table>
 
   <p v-else class="usa-prose text-center">No matches.</p>

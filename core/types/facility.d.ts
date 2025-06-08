@@ -7,38 +7,38 @@ export interface SubmissionLite {
   num_accidents: number | null;
   latest_accident: string | null;
 }
-
 export interface FacilityLite {
-  EPAFacilityID: string;
-  name: string;
+  facilityId: string;
+  facilityName: string;
+  address: string;
   city: string;
+  state: string;
+  zipcode: string;
+  facilityURL: string | null;
+  facilityLat: string;
+  facilityLong: string;
+  parentCompanyName: string | null;
+  facilityDUNS: number | null;
+  operatorName: string;
+  noAccidents: string;
+  programLevel: number;
 
-  // our injected state object
-  state: {
-    abbr: string;
-    name: string;
-  };
+  accidents: Array<{
+    accidentHistoryId: number;
+    accidentDate: string;
+    accidentTime: string;
+    // Add more fields if needed later
+  }> | null;
 
-  // only present on detail objects; keep optional
-  zip?: string;
-  address?: string;
-
-  // optional summary fields
-  company_1?: string;
-  company_2?: string;
-  county_fips?: string;
-  names_prev?: string[];
-
-  sub_last?: {
-    // in the by-state summary you only get these two at a minimum
-    id?: string;
-    date_val?: string;
-    date_dereg?: string;
-    lat_sub?: number;
-    lon_sub?: number;
-    num_accidents?: number;
-    latest_accident?: string;
-  };
+  submissions: Array<{
+    submissionId: number;
+    chemicals: Array<{
+      chemicalId: number;
+      quantity: number;
+      chemicalName: string;
+    }>;
+    naicsCode: string[];
+  }>;
 }
 
 export interface CountyGroup {
