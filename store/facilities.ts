@@ -56,6 +56,7 @@ export const useFacilitiesStore = defineStore('fac', {
 
     /* last filter payload */
     filters : {} as Record<string,any>,
+    showAll: false, // <-- Add this line
     loading : true
   }),
 
@@ -95,6 +96,12 @@ export const useFacilitiesStore = defineStore('fac', {
       const { data,error } = await useFetch<SearchResponse>(url)
       if (error.value) console.error('fetchAll error',error.value)
       else if (data.value) this.allFacilities = data.value.facilities
+    },
+
+    toggleShowAll() {
+      console.log(this.allFacilities)
+      console.log(this.results)
+      this.showAll = !this.showAll // Toggle the showAll state
     },
 
     async goToPage(newPage:number){

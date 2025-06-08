@@ -10,6 +10,7 @@ import {
   tlkpchemicals,
 } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
+import { useFacilitiesStore } from '~/store/facilities'
 
 // A helper to run the same logic you use in /api/search but returning all facilities
 async function fetchAllFacilities() {
@@ -17,7 +18,7 @@ async function fetchAllFacilities() {
   // ... you’d basically copy the "4) pick page" + "5) fetch headers" + "6/7 subRows/accRows" + JS nesting
   // For brevity I’ll demo a simplified version that fetches just the columns we need:
   return db
-    .select({
+    .selectDistinctOn([tbls1Facilities.epaFacilityId, tbls1Facilities.facilityName],{
       EPAFacilityID:    tbls1Facilities.epaFacilityId,
       name:             tbls1Facilities.facilityName,
       address:          tbls1Facilities.facilityStr1,

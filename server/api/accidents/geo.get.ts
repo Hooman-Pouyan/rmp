@@ -8,8 +8,11 @@ import {
   tbls1Facilities
 } from '~/drizzle/schema'
 import { eq } from 'drizzle-orm'
+import { useFacilitiesStore } from '~/store/facilities'
 
 export default defineEventHandler(async () => {
+
+    // const store = useFacilitiesStore()
   const rows = await db
     .select({
       id:               tbls6Accidenthistory.accidentHistoryId,
@@ -58,7 +61,6 @@ export default defineEventHandler(async () => {
         initiatingEvent: r.initiatingEvent,
         cfEquipment:     r.cfEquipment,
         cfHumanError:    r.cfHumanError,
-        // …
       }
     }
   }).filter(Boolean)

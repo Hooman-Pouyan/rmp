@@ -198,7 +198,7 @@ async function initMap() {
 
   accHeat = new GeoJSONLayer({
     id: 'heat',
-    url: '/api/facilities/geo',
+    url: '/api/accidents/geo',
     title: 'Accident Heat',
     visible: false,
     popupEnabled: false,

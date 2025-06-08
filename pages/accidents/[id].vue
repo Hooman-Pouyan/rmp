@@ -76,6 +76,8 @@ const loading  = ref(true)
 const error    = ref('')
 
 onMounted(async () => {
+  console.log("iDDDDDD", id);
+  
   const { data, error: fetchError } = await useFetch<AccidentDetail>(`/api/accidents/${id}`)
   if (fetchError.value) {
     error.value = fetchError.value.message
