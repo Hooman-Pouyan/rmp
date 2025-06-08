@@ -1,85 +1,70 @@
 // server/api/facilities/geo.get.ts
-import type { StateFacilities, FacilityLite } from '~/core/types/facility'
+import { defineEventHandler } from 'h3'
+import { db } from '../../utils/drizzle.server'
+import {
+  tbls1Facilities,
+  tbls1Processes,
+  tbls1Processchemicals,
+  tbls1ProcessNaics,
+  tbls6Accidenthistory,
+  tlkpchemicals,
+} from '../../../drizzle/schema'
+import { eq } from 'drizzle-orm'
 
-const STATE_ABBRS = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME',
-  'MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA',
-  'RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
-]
+// A helper to run the same logic you use in /api/search but returning all facilities
+async function fetchAllFacilities() {
+  // (Re-use your search logic, but no WHERE, page=all)
+  // ... you’d basically copy the "4) pick page" + "5) fetch headers" + "6/7 subRows/accRows" + JS nesting
+  // For brevity I’ll demo a simplified version that fetches just the columns we need:
+  return db
+    .select({
+      EPAFacilityID:    tbls1Facilities.epaFacilityId,
+      name:             tbls1Facilities.facilityName,
+      address:          tbls1Facilities.facilityStr1,
+      city:             tbls1Facilities.facilityCity,
+      state:            tbls1Facilities.facilityState,
+      zipcode:          tbls1Facilities.facilityZipCode,
+      facilityURL:      tbls1Facilities.facilityUrl,
+      facilityLat:      tbls1Facilities.facilityLatDecDegs,
+      facilityLong:     tbls1Facilities.facilityLongDecDegs,
+      parentCompany:    tbls1Facilities.parentCompanyName,
+      facilityDUNS:     tbls1Facilities.facilityDuns,
+      operatorName:     tbls1Facilities.operatorName,
+      noAccidents:      tbls1Facilities.noAccidents,
+
+      // you can continue to pull anything else:
+      company_2:        tbls1Facilities.company2Name,
+      county_fips:      tbls1Facilities.facilityCountyFips,
+      submissionType:   tbls1Facilities.submissionType,
+      // … etc …
+
+      // (then later you’d fetch subRows + accRows and attach them)
+    })
+    .from(tbls1Facilities)
+    .execute()
+}
 
 export default defineEventHandler(async () => {
-  /* ---- 1. fetch + cache all 50 state JSON blobs (once per worker) ---- */
-  let states: StateFacilities[] = (globalThis as any).__cacheStates_geo || []
-  if (!states.length) {
-    const tmp: StateFacilities[] = []
-    for (const abbr of STATE_ABBRS) {
-      try {
-        const res = await fetch(
-          `https://data-liberation-project.github.io/epa-rmp-viewer/data/facilities/by-state/${abbr}.json`
-        )
-        if (res.ok) tmp.push(await res.json() as StateFacilities)
-      } catch { /* skip on error */ }
+  const facs = await fetchAllFacilities()
+
+  const features = facs.map(f => {
+    const lat = parseFloat(f.facilityLat as any)
+    const lon = parseFloat(f.facilityLong as any)
+    if (isNaN(lat) || isNaN(lon)) return null
+
+    return {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [lon, lat] },
+      properties: {
+        ...f,
+        // make sure numeric IDs are strings for ArcGIS
+        EPAFacilityID: String(f.EPAFacilityID),
+      }
     }
-    ;(globalThis as any).__cacheStates_geo = tmp
-    states = tmp
+  }).filter(Boolean)
+
+  return {
+    type: 'FeatureCollection',
+    features
   }
-
-  /* ---- 2. flatten to Feature[] with rich attributes ------------------ */
-  const features = states.flatMap(s =>
-    s.counties.flatMap(c =>
-      c.facilities.map((f: FacilityLite | any) => {
-        /* lat/lon come from most recent submission record */
-        const lat = parseFloat(f.sub_last?.lat_sub as unknown as string)
-        const lon = parseFloat(f.sub_last?.lon_sub as unknown as string)
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
-
-        /* submissions array exists only in the master JSON, not in state blobs.
-           EPA’s pre-built state files include: subs, acc, prog_max, tox flag */
-        const subsFile = f.subs        ?? 0
-        const accFile  = f.acc         ?? 0
-        const pFile    = f.prog_max    ?? null      // may be 0-3 or null
-        const toxFile  = f.tox         ?? false
-
-        /* If we do have full submissions, compute richer stats */
-        const submissions = f.submissions ?? []
-        const subsCalc = submissions.length || subsFile
-        const accCalc  = submissions.reduce(
-                           (a:any,s:any)=>a+(s.num_accidents??0), 0) || accFile
-        const pCalc    = submissions.flatMap(
-                           (s:any)=>s.processes?.map((p:any)=> {
-                            console.log({p});
-                            return (p.ProgramLevel ?? 0) || []
-                           }))
-                         .reduce((m,n)=>Math.max(m,n),0) || pFile || 0
-        const toxCalc  = submissions.some(
-                           (s:any)=>s.processes?.some((p:any)=>p.MH_ToxicRelease)) || toxFile
-
-        /* Store pLevel as *string*; unique-value renderer keys are strings */
-        const pLevelStr = String(pCalc)
-
-        console.log("_______", pLevelStr, );
-        
-
-        return {
-          type:'Feature',
-          geometry:{ type:'Point', coordinates:[lon,lat] },
-          properties:{
-            id:   f.EPAFacilityID,
-            name: f.name,
-            city: f.city,
-            state:s.abbr,
-            lastDate: f.sub_last?.date_val,
-            /* derived */
-            subs : subsCalc,
-            acc  : accCalc,
-            pLevel: pCalc,       // "0".."3"
-            toxRe: toxCalc
-          }
-        }
-      })
-    ).filter(Boolean)
-  )
-
-  /* ---- 3. return GeoJSON -------------------------------------------- */
-  return { type:'FeatureCollection', features }
 })
