@@ -63,7 +63,7 @@ async function initMap () {
 
   const map = new Map({
     basemap: new Basemap({
-      style: new BasemapStyle({ id: "arcgis/hybrid", places: 'attributed' })
+      style: new BasemapStyle({ id: "arcgis/imagery", places: 'attributed' })
     })
   })
 
