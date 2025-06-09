@@ -34,7 +34,6 @@ watch(() => f.state, async (abbr) => {
 
 <template>
   <fieldset class="usa-fieldset margin-bottom-4">
-    <legend class="usa-legend margin-bottom-2">Geographic Location</legend>
 
     <div class="grid grid-cols-2">
 

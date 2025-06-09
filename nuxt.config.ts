@@ -37,13 +37,7 @@ export default defineNuxtConfig({
   },
   modules: [
     "@pinia/nuxt",
-    [
-      "nuxt-uswds",
-      {
-        autoImportBaseComponents: true,
-        autoImportComponents: true,
-      },
-    ],
+    "nuxt-uswds",
     "@nuxthub/core",
   ],
 });

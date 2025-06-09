@@ -36,7 +36,6 @@ onMounted(async () => {
 
 <template>
   <fieldset class="usa-fieldset margin-bottom-2">
-    <legend class="usa-legend margin-top-0">Process</legend>
 
     <div class="grid-row grid-gap">
       <!-- Chemical(s) -->

@@ -9,7 +9,7 @@ import {
   tbls6Accidenthistory,
   tlkpchemicals,
 } from '../../../drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { useFacilitiesStore } from '~/store/facilities'
 
 // A helper to run the same logic you use in /api/search but returning all facilities
@@ -21,6 +21,13 @@ async function fetchAllFacilities() {
     .selectDistinctOn([tbls1Facilities.epaFacilityId, tbls1Facilities.facilityName],{
       EPAFacilityID:    tbls1Facilities.epaFacilityId,
       name:             tbls1Facilities.facilityName,
+      pLevel : sql<number>`
+        coalesce( 
+          (select max(${tbls1Processes.programLevel})
+             from ${tbls1Processes}
+            where ${tbls1Processes.facilityId} = ${tbls1Facilities.facilityId}),
+          0
+        )`.mapWith(Number),
       address:          tbls1Facilities.facilityStr1,
       city:             tbls1Facilities.facilityCity,
       state:            tbls1Facilities.facilityState,

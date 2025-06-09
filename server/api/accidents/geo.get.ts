@@ -17,6 +17,7 @@ export default defineEventHandler(async () => {
     .select({
       id:               tbls6Accidenthistory.accidentHistoryId,
       facilityId:       tbls6Accidenthistory.facilityId,
+      EPAFacilityID: tbls1Facilities.epaFacilityId,
       date:             tbls6Accidenthistory.accidentDate,
       time:             tbls6Accidenthistory.accidentTime,
       naicsCode:        tbls6Accidenthistory.naicsCode,
@@ -49,6 +50,7 @@ export default defineEventHandler(async () => {
       geometry: { type: 'Point', coordinates: [lon, lat] },
       properties: {
         id:              String(r.id),
+        EPAFacilityID  : String(r.EPAFacilityID), 
         facilityId:      String(r.facilityId),
         accidentDate:    r.date,
         accidentTime:    r.time,

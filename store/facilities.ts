@@ -98,10 +98,12 @@ export const useFacilitiesStore = defineStore('fac', {
       else if (data.value) this.allFacilities = data.value.facilities
     },
 
-    toggleShowAll() {
-      console.log(this.allFacilities)
-      console.log(this.results)
-      this.showAll = !this.showAll // Toggle the showAll state
+    async toggleShowAll () {
+        this.showAll = !this.showAll
+        /* first time user turns “Show All” on → make sure we have the full list */
+        if (this.showAll && !this.allFacilities.length){
+          await this.fetchAll(this.filters)
+      }
     },
 
     async goToPage(newPage:number){

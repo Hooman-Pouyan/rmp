@@ -10,7 +10,6 @@ const f = props.modelValue
 
 <template>
   <fieldset class="usa-fieldset margin-bottom-4">
-    <legend class="usa-legend">Facility</legend>
 
     <div class="grid-row grid-gap">
 

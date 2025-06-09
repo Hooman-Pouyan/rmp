@@ -7,6 +7,7 @@ import LocationSection from '~/components/search/LocationSection.vue'
 import ProcessSection from '~/components/search/ProcessSection.vue'
 import ResultsTable from '~/components/search/ResultsTable.vue'
 import ArcFacilitiesMap from '~/components/ArcFacilitiesMap.vue'
+import AccidentSection  from '~/components/search/AccidentSection.vue'
 
 const filters: any = reactive({
   facilityName: '',
@@ -26,9 +27,15 @@ const filters: any = reactive({
   chemicalType: '',
   programLevel: '',
   naicsCodes: [] as string[],
+  hasAccidents:false,
+  accFromDate :'',
+  accToDate   :'',
+  accFromTime :'',
+  accToTime   :'',
   page: 1,
   perPage: 20,
 })
+
 
 const filtersModel = computed({
   get: () => filters,
@@ -65,50 +72,62 @@ function toggleShowAll() {
 }
 
 
+
 function onFiltersUpdate(p: any) {
   console.debug('update:modelValue', p)
 }
 </script>
 
 <template>
-  <section class="usa-card usa-card--bordered grid grid-cols-2 gap-3 items-start w-full h-fit py-2 px-3">
-    <div class="space-y-4">
+  <section class="usa-card usa-card--bordered grid grid-cols-1 gap-3 items-start w-full h-fit mt-5">
       <header class="usa-card__header !px-0">
         <h1 class="usa-card__heading text-3xl font-bold">Risk Management Plan</h1>
         <p class="text-lg">The Risk Management Plan (RMP) rule implements Section&nbsp;112(r) of the 1990 Clean Air Act …</p>
       </header>
 
+    <!-- Map Column -->
+    <client-only>
+    <ArcFacilitiesMap
+    :facilities="store.showAll ? store.allFacilities : store.results"
+    :focus-ids="store.results.map((r: FacilityLite) => r.facilityId)"
+    :show-all="store.showAll"  
+    />
+    </client-only>
+
+    <div class="flex justify-end items-center">
+        <button class="usa-button usa-button--outline w-fit" @click="toggleShowAll">
+          {{ store.showAll ? 'Show Paginated Data' : 'Show All Data' }}
+        </button>
+    </div>
+
+      
+       <div class="space-y-4">
+
       <UsaAccordion bordered class="margin-bottom-2 usa-accordion--multiselectable">
-        <UsaAccordionItem open id="facility">
-          <template #title>Facility</template>
+        <UsaAccordionItem ref="facility" label="Facility" open>
           <FacilitySection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
         </UsaAccordionItem>
 
-        <UsaAccordionItem id="location">
-          <template #title>Geographic Location</template>
+        <UsaAccordionItem  ref="Location" label="Location">
           <LocationSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
         </UsaAccordionItem>
 
-        <UsaAccordionItem id="process">
-          <template #title>Process</template>
+        <UsaAccordionItem ref="Process" label="Process">
           <ProcessSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
         </UsaAccordionItem>
+
+        <UsaAccordionItem ref="Accidents" label="Accidents">
+          <AccidentSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
+         </UsaAccordionItem>
       </UsaAccordion>
 
       <div class="flex justify-end gap-2">
         <button class="usa-button usa-button--outline" @click="clearFilters">Clear</button>
         <button class="usa-button" @click="runSearch">Search</button>
-                <button class="usa-button usa-button--outline" @click="toggleShowAll">
-          {{ store.showAll ? 'Show Paginated Data' : 'Show All Data' }}
-        </button>
+        <!-- <button class="usa-button" @click="toggleFilterDrawer">Filters</button> -->
       </div>
     </div>
 
-    <!-- Map Column -->
-    <ArcFacilitiesMap
-      :facilities="store.showAll ? store.allFacilities : store.results"
-      :focus-ids="store.results.map((r: FacilityLite) => r.facilityId)"
-    />
   </section>
 
   <!-- Results Section -->
