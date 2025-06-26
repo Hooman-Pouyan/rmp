@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useFetch } from 'nuxt/app';
 import { ref, onMounted } from 'vue'
 
 const props = defineProps<{ modelValue: any }>()
@@ -17,8 +18,13 @@ const naicsList     = ref<Option[]>([])
 
 onMounted(async () => {
   /* 1️⃣  Load dictionaries once (bundled via Nuxt static folder) */
+  const lookups  = await fetch("https://data-liberation-project.github.io/epa-rmp-viewer/data/lookups/lookups.json")
+    .then(res => res.json())
+    .catch(err => {
+      console.error("Failed to load lookups data:", err)
+      return { ok: false }
+    })
 
-  const { default: lookups } = await import('/data/lookups.json')
 
   /* 2️⃣  Chemicals — show short name, keep ChemicalID as value */
   chemicalsList.value = Object.entries(lookups.ChemicalID)
