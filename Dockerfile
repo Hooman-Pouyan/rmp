@@ -1,7 +1,7 @@
 # ───────────────────────────────────────────────────────────────────────────────
 # Stage 1: “builder” → install dependencies, compile, generate .output
 # ───────────────────────────────────────────────────────────────────────────────
-FROM node:16-alpine AS builder
+FROM node:20.18.0-alpine AS builder
 
 # 1) Set working directory
 WORKDIR /app
@@ -33,7 +33,7 @@ RUN yarn build
 # ───────────────────────────────────────────────────────────────────────────────
 # Stage 2: “production” → copy only the compiled .output + data/lookups → run
 # ───────────────────────────────────────────────────────────────────────────────
-FROM node:16-alpine AS runtime
+FROM node:20.18.0-alpine AS runtime
 
 # 1) Create a non-root user (optional but recommended)
 RUN addgroup -S nuxtgroup && adduser -S nuxtuser -G nuxtgroup
