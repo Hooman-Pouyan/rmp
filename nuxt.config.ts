@@ -15,6 +15,12 @@ export default defineNuxtConfig({
   nitro: {
     // expose ./data + ./db to Nitro (server) bundle
     publicAssets: [{ dir: "data", maxAge: 60 }],
+    preset: 'node',              // or 'vercel' if you’ll `vercel deploy`
+
+    // > Inline the optional pg-native module so Nitro stops complaining
+    externals: {
+      inline: ['pg-native']
+    }
   },
   typescript: { strict: true },
   app: {
@@ -37,7 +43,6 @@ export default defineNuxtConfig({
   },
   modules: [
     "@pinia/nuxt",
-    "nuxt-uswds",
-    "@nuxthub/core",
+    "nuxt-uswds"
   ],
 });

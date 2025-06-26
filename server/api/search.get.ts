@@ -89,8 +89,11 @@ export default defineEventHandler(async (event) => {
   /* 2c. accident conditions */
   const accWhere: any[] = []
   if (hasAccidents) {
-    /* “hasAccidents=true”  ⇒ exclude facilities that declare ‘NoAccidents’ */
-    accWhere.push(eq(tbls1Facilities.noAccidents, 'No'))
+    // must have ≥1 linked accident row
+    const needAccJoin = true                      // <-- force the join
+    accWhere.push(
+      sql`${tbls6Accidenthistory.accidentHistoryId} IS NOT NULL`
+    )
   }
   if (accFromDate) accWhere.push(gte(tbls6Accidenthistory.accidentDate, accFromDate))
   if (accToDate)   accWhere.push(lte(tbls6Accidenthistory.accidentDate, accToDate))
