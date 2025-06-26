@@ -17,7 +17,8 @@ const naicsList     = ref<Option[]>([])
 
 onMounted(async () => {
   /* 1️⃣  Load dictionaries once (bundled via Nuxt static folder) */
-  const { default: lookups } = await import('../../static/data/lookups.json')
+
+  const { default: lookups } = await import('/data/lookups.json')
 
   /* 2️⃣  Chemicals — show short name, keep ChemicalID as value */
   chemicalsList.value = Object.entries(lookups.ChemicalID)
