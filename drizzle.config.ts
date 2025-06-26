@@ -6,6 +6,6 @@ export default defineConfig({
   schema: './drizzle/schema.ts',
   dialect: 'postgresql',
   dbCredentials: {
-    url: "postgresql://localhost:5432/postgres",
+    url: "postgresql://rmp_owner:npg_RC2P5cxwstGo@ep-silent-truth-a8s192bk-pooler.eastus2.azure.neon.tech/rmp?sslmode=require&channel_binding=require",
   },
 });

@@ -90,7 +90,7 @@ export default defineEventHandler(async (event) => {
   const accWhere: any[] = []
   if (hasAccidents) {
     /* “hasAccidents=true”  ⇒ exclude facilities that declare ‘NoAccidents’ */
-    accWhere.push(eq(tbls1Facilities.noAccidents, 'YES'))
+    accWhere.push(eq(tbls1Facilities.noAccidents, 'No'))
   }
   if (accFromDate) accWhere.push(gte(tbls6Accidenthistory.accidentDate, accFromDate))
   if (accToDate)   accWhere.push(lte(tbls6Accidenthistory.accidentDate, accToDate))
