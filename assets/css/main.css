@@ -1,0 +1,28 @@
+@import "uswds-vue/dist/uswds-vue.css";
+@import "tailwindcss";
+@import "https://js.arcgis.com/calcite-components/3.0.3/calcite.css";
+@import "https://js.arcgis.com/4.32/@arcgis/core/assets/esri/themes/light/main.css";
+@import "https://js.arcgis.com/map-components/4.32/arcgis-map-components.css";
+@import url("https://js.arcgis.com/4.32/calcite-components/3.0.3/calcite.css");
+
+/* ArcGIS Core  */
+@import url("https://js.arcgis.com/4.32/4.32/@arcgis/core/assets/esri/themes/dark/main.css");
+
+/* Map Components */
+@import "https://js.arcgis.com/4.32/map-components/4.32/arcgis-map-components.css";
+
+html,
+body {
+      margin: 0;
+      height: 100%;
+}
+
+#viewDiv,
+arcgis-map {}
+
+calcite-list,
+calcite-button {
+      --calcite-color-text-1: #3c83b7;
+      --calcite-color-text-2: #3c83b7;
+      --calcite-color-text-3: #3c83b7;
+}

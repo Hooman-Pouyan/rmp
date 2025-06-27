@@ -1,0 +1,46 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@arcgis/core": "^4.32.10",
+    "@arcgis/map-components": "^4.32.14",
+    "@libsql/client": "^0.15.8",
+    "@nuxthub/core": "^0.8.27",
+    "@pinia/nuxt": "^0.11.0",
+    "@tailwindcss/vite": "^4.1.7",
+    "@types/node": "^22.15.18",
+    "@uswds/uswds": "^3.12.0",
+    "better-sqlite3": "^11.10.0",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.44.2",
+    "nuxt": "^3.17.2",
+    "nuxt-uswds": "^1.0.2",
+    "pg": "^8.16.0",
+    "pinia": "^3.0.2",
+    "tailwindcss": "^4.1.7",
+    "uswds": "^2.14.0",
+    "uswds-vue": "^0.1.51",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
+    "vue-uswds": "^1.14.0"
+  },
+  "devDependencies": {
+    "@nuxt/ui": "^3.1.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/pg": "^8.15.4",
+    "drizzle-kit": "^0.31.1",
+    "wrangler": "^4.19.1"
+  }
+}
