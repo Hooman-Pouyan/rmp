@@ -16,9 +16,6 @@ export default defineNuxtConfig({
     // expose ./data + ./db to Nitro (server) bundle
     publicAssets: [{ dir: "data", maxAge: 60 }],
     preset: 'vercel',
-    output: {
-       dir: 'output' // Adjust path if needed
-    },
     // > Inline the optional pg-native module so Nitro stops complaining
     externals: {
       inline: ['pg-native']
