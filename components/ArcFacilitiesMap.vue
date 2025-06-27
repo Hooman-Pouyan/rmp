@@ -6,6 +6,8 @@
 import '@arcgis/core/assets/esri/themes/light/main.css'
 import { ref, onMounted, watch } from 'vue'
 import type { FacilityLite }      from '~/core/types/facility'
+import { useRouter } from '#app'    // top of <script setup>
+const router = useRouter()
 
 const props = defineProps<{
   facilities : FacilityLite[]   // not touched here, layers load from /geo APIs
@@ -59,12 +61,12 @@ async function initMap () {
 
   
 
-  esriConfig.apiKey = process.env.NUXT_PUBLIC_ESRI_API_KEY
+  esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurGWwo8_m_Pe4F4Bzc_7SwVX55Yw3h2s7mKjq8aVnacz3dZpd82xdKW84V4Q-PSNrV_08GiOy8hxPT98iNFNbhCcB3fCbxDvVSvQdISUlETk-MtoDnYojulpeKWYzi0jdFtgx7xM_aC-a1S3sPB4u2-seMGRBnv8xjyWLWK9NSOn9LYNFOwbAawkVEKPpxNSKQ62PdXMvturt1HxwBZR7i6Q.AT1_J1TRAvHC"
 
   const map = new Map({
     basemap: new Basemap({
-      style: new BasemapStyle({ id: "arcgis/imagery", places: 'attributed' })
-    })
+      style: new BasemapStyle({ id: "arcgis/imagery", places: 'attributed' }),
+    }),
   })
 
   view = new MapView({
@@ -87,7 +89,13 @@ async function initMap () {
         <strong>EPA ID:</strong> {EPAFacilityID}<br>
         <strong>Address:</strong> {address}, {city}, {state} {zipcode}<br>
         <strong>Parent:</strong> {parentCompany}<br>
-        <strong>DUNS:</strong> {facilityDUNS}`
+        <strong>DUNS:</strong> {facilityDUNS}
+        <br>
+      <a href="${location.origin}/facility/{EPAFacilityID}"
+         target="_blank" rel="noopener">
+         View facility detail
+      </a>
+    `
     },
     renderer: {
       type: 'simple',
@@ -134,19 +142,16 @@ async function initMap () {
     renderer:{
       type:'unique-value', field:'pLevel',
       uniqueValueInfos:[
-        { value:'1', label:'Program 1',
+        { value: "1", label:'Program 1',
           symbol:{ type:'simple-marker', style:'square',
                    color:'#4ADE80', size:10 } },
-        { value:'2', label:'Program 2',
+        { value: "2", label:'Program 2',
           symbol:{ type:'simple-marker', style:'square',
                    color:'#FACC15', size:10 } },
-        { value:'3', label:'Program 3',
+        { value: "3", label:'Program 3',
           symbol:{ type:'simple-marker', style:'square',
                    color:'#F87171', size:10 } }
       ],
-      defaultSymbol:{ type:'simple-marker', style:'square',
-                      color:'#9CA3AF', size:8 },
-      defaultLabel:'None / Unknown'
     }
   })
 
@@ -169,7 +174,11 @@ async function initMap () {
         <strong>Duration:</strong> {releaseDuration}<br>
         <strong>Explosion:</strong> {reExplosion}<br>
         <strong>Fire:</strong> {reFire}<br>
-        <a href='/accidents/{id}'>View detail</a>`
+        <a href='/accidents/{id}'></a>
+              <a href="${location.origin}/accidents/{id}"
+         target="_blank" rel="noopener">
+         View detail
+      </a>`
     }
   })
 
@@ -195,6 +204,18 @@ async function initMap () {
   
   view.ui.add(new Fullscreen({ view }), "top-left");  
   view.ui.add(new LayerList({ view }), 'bottom-right')
+
+//   view.on('click', async event => {
+//   const hit = await view.hitTest(event)
+//   if (!hit.results.length) return
+//   const g   = hit.results[0].graphic
+//   const att = g.attributes
+
+//   console.log({event});
+  
+//   // if (g.layer.id === 'fac') router.push(`/facility/${att.EPAFacilityID}`)
+//   // if (g.layer.id === 'acc') router.push(`/accidents/${att.id}`)
+// })
 
   await view.when()
 

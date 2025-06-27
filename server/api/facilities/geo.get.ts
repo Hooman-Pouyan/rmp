@@ -65,6 +65,7 @@ export default defineEventHandler(async () => {
       geometry: { type: 'Point', coordinates: [lon, lat] },
       properties: {
         ...f,
+        pLevel: String(f.pLevel ?? ''),
         // make sure numeric IDs are strings for ArcGIS
         EPAFacilityID: String(f.EPAFacilityID),
       }

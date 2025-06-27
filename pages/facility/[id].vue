@@ -2,15 +2,14 @@
   <section class="usa-section">
     <!-- Loading / Error States -->
     <div v-if="loading" class="usa-prose h-[250px]">
-  <div className="w-full h-full flex justify-center items-center">
-                                    <span className="animate-spin rounded-full flex justify-center items-center h-16 w-16 border-t-4 border-blue-500"></span>
-                              </div>
+      <div className="w-full h-full flex justify-center items-center">
+        <span className="animate-spin rounded-full flex justify-center items-center h-16 w-16 border-t-4 border-blue-500"></span>
+      </div>
     </div>
+
     <div v-else-if="error" class="usa-prose">
       <div class="usa-alert usa-alert--error">
-        <div class="usa-alert__body">
-          {{ error }}
-        </div>
+        <div class="usa-alert__body">{{ error }}</div>
       </div>
     </div>
 
@@ -21,6 +20,7 @@
         <header class="usa-card__header">
           <h1 class="usa-card__heading">{{ facility?.name }}</h1>
         </header>
+
         <div class="usa-card__body grid-row grid-gap">
           <!-- Left column: Basic Info -->
           <div class="tablet:grid-col-6">
@@ -71,7 +71,10 @@
                 <dt class="usa-identifier-list__label">Last Validated</dt>
                 <dd class="usa-identifier-list__value">{{ mostRecentSubmission.date_val }}</dd>
               </div>
-              <div class="usa-identifier-list__item" v-if="mostRecentSubmission && mostRecentSubmission.date_dereg">
+              <div
+                class="usa-identifier-list__item"
+                v-if="mostRecentSubmission && mostRecentSubmission.date_dereg"
+              >
                 <dt class="usa-identifier-list__label">Deregistered On</dt>
                 <dd class="usa-identifier-list__value">{{ mostRecentSubmission.date_dereg }}</dd>
               </div>
@@ -94,6 +97,7 @@
               <th class="usa-table__header">Facility Name</th>
             </tr>
           </thead>
+
           <tbody class="usa-table__body">
             <tr
               v-for="sub in sortedSubmissions"
@@ -109,6 +113,7 @@
               <td class="usa-table__cell">{{ sub.num_accidents ?? '0' }}</td>
               <td class="usa-table__cell">{{ sub.name }}</td>
             </tr>
+
             <tr v-if="!facility?.submissions.length">
               <td colspan="6" class="usa-table__cell text-center">No submissions found.</td>
             </tr>
@@ -120,11 +125,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useFetch } from '#app'
+import { computed }   from 'vue'
+import { useFetch }   from '#app'
 
-/** Basic TypeScript interface matching “facility” shape **/
+/* —————————————————— Type helpers (unchanged) —————————————————— */
 interface SubmissionSummary {
   id: number
   date_rec: string
@@ -153,56 +158,39 @@ interface FacilityDetail {
   company_2?: string
   operator?: string
   submissions: SubmissionSummary[]
-  accidents: any[]     // not used here
-  names_prev: string[] // not used here
+  accidents: any[]
+  names_prev: string[]
 }
 
-const route = useRoute()
-const facilityId = route.params.id as string
+/* —————————————————— Reactive route param —————————————————— */
+const route      = useRoute()
+const facilityId = computed(() => route.params.id as string)
 
-const facility: any = ref<FacilityDetail | null>(null)
-const loading = ref(true)
-const error = ref<string | null>(null)
+/* —————————————————— SSR-aware fetch —————————————————— */
+const {
+  data: facility,
+  pending: loading,
+  error
+} = await useFetch<FacilityDetail>(
+  () => `/api/facilities/${facilityId.value}`,
+  { key: () => `facility-${facilityId.value}` }
+)
 
-onMounted(async () => {
-  try {
-    const { data, error: fetchError } = await useFetch<FacilityDetail>(
-      `/api/facilities/${facilityId}`
-    )
-    if (fetchError.value) {
-      error.value = fetchError.value.message || 'Failed to load facility.'
-      return
-    }
-    facility.value = data.value
-  } catch (err) {
-    error.value = 'An unexpected error occurred.'
-  } finally {
-    loading.value = false
-  }
-})
+/* —————————————————— Derived data —————————————————— */
+const sortedSubmissions = computed(() =>
+  facility.value
+    ? [...facility.value.submissions].sort((a, b) =>
+        b.date_val.localeCompare(a.date_val))
+    : []
+)
 
-const sortedSubmissions = computed(() => {
-  if (!facility.value) return []
-  return [...facility.value.submissions].sort((a, b) => {
-    // sort by date_val descending
-    return b.date_val.localeCompare(a.date_val)
-  })
-})
-
-const mostRecentSubmission = computed(() => {
-  return sortedSubmissions.value.length ? sortedSubmissions.value[0] : null
-})
+const mostRecentSubmission = computed(() =>
+  sortedSubmissions.value[0] ?? null
+)
 </script>
 
 <style scoped>
-.margin-bottom-4 {
-  margin-bottom: 2rem;
-}
-.usa-identifier-list__label {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-.usa-identifier-list__value {
-  margin-bottom: 0.75rem;
-}
+.margin-bottom-4 { margin-bottom: 2rem; }
+.usa-identifier-list__label { font-weight: 600; margin-bottom: 0.25rem; }
+.usa-identifier-list__value { margin-bottom: 0.75rem; }
 </style>
