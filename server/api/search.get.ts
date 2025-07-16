@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
   const q      = getQuery(event) as Record<string, string | string[] | undefined>
   const first  = (v?: string | string[]) => Array.isArray(v) ? v[0] : (v || '')
   const toBool = (v?: string | string[]) => first(v).toLowerCase() === 'true'
+  
 
   /* facility-level */
   const facilityName      = first(q.facilityName).trim()
@@ -55,6 +56,7 @@ export default defineEventHandler(async (event) => {
       ? Number.MAX_SAFE_INTEGER
       : Math.max(1, parseInt(first(q.perPage) || '20', 10))
   const offset  = (page - 1) * perPage
+  const brokenCoordsOnly = toBool(q.brokenCoordsOnly);
 
   /* ─────────────────────────── 2. WHERE clauses ───────────────────────────── */
   /* 2a. facility conditions */
@@ -79,6 +81,13 @@ export default defineEventHandler(async (event) => {
   if (city)  facWhere.push(eq(sql`lower(${tbls1Facilities.facilityCity})`, city.toLowerCase()))
   if (state) facWhere.push(eq(tbls1Facilities.facilityState, state))
   if (zip)   facWhere.push(eq(tbls1Facilities.facilityZipCode, zip))
+  facWhere.push(
+  eq(tbls1Facilities.validLatLongFlag, 'Yes')
+)
+  facWhere.push(
+  sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision) >= 0`,
+  sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision) < 0`
+)
 
   /* 2b. process conditions */
   const procWhere: any[] = []
