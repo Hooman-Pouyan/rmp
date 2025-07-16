@@ -9,7 +9,7 @@ import {
   tbls6Accidenthistory,
   tlkpchemicals,
 } from '../../../drizzle/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, and } from 'drizzle-orm'
 import { useFacilitiesStore } from '~/store/facilities'
 
 // A helper to run the same logic you use in /api/search but returning all facilities
@@ -49,9 +49,11 @@ async function fetchAllFacilities() {
       // (then later you’d fetch subRows + accRows and attach them)
     })
     .from(tbls1Facilities).where(
-      sql`(${tbls1Facilities.validLatLongFlag} = 'Yes')` &&
-      sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::float >= 0)` &&
+      and(
+      sql`(${tbls1Facilities.validLatLongFlag} = 'Yes')`,
+      sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::float >= 0)`,
       sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::float <  0)`
+      )
     )
     .execute()
 }

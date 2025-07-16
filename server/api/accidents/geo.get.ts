@@ -7,7 +7,7 @@ import {
   tlkpchemicals,
   tbls1Facilities
 } from '~/drizzle/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, and } from 'drizzle-orm'
 import { useFacilitiesStore } from '~/store/facilities'
 
 export default defineEventHandler(async () => {
@@ -35,9 +35,11 @@ export default defineEventHandler(async () => {
       lon: tbls1Facilities.facilityLongDecDegs
     })
     .from(tbls6Accidenthistory).where(
-      sql`(${tbls1Facilities.validLatLongFlag} = 'Yes')` &&
-      sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::float >= 0)` &&
+      and(
+      sql`(${tbls1Facilities.validLatLongFlag} = 'Yes')`,
+      sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::float >= 0)`,
       sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::float <  0)`
+      )
     )
     .innerJoin(tbls1Facilities, eq(
       tbls6Accidenthistory.facilityId,

@@ -109,7 +109,17 @@ const accidentSubquery = db
     .leftJoin(chemicalsSubquery, eq(chemicalsSubquery.processId, tbls1Processes.processId))
     .leftJoin(naicsSubquery, eq(naicsSubquery.processId, tbls1Processes.processId))
     .leftJoin(tbls9Emergencyresponses, eq(tbls1Facilities.facilityId, tbls9Emergencyresponses.facilityId))
-    .leftJoin(accidentSubquery, eq(tbls1Facilities.facilityId, accidentSubquery.facilityId))
+    .leftJoin(accidentSubquery, eq(tbls1Facilities.facilityId, accidentSubquery.facilityId)).where(
+      and(
+        // only keep U.S.‐style coords: lat ≥ 0
+        sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision) >= 0`,
+        // … and long  < 0
+        sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision) < 0`,
+        // optional: only rows marked “valid”
+        eq(tbls1Facilities.validLatLongFlag, 'Yes')
+      )
+    )
+
     .execute();
 
   return submissions;
