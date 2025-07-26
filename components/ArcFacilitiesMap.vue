@@ -1,5 +1,5 @@
 <template>
-    <div ref="mapDiv" style="width:100%; height:600px"></div>
+    <div ref="mapDiv" style="width:100%; height:100%"></div>
 </template>
 
 <script setup lang="ts">
@@ -13,6 +13,7 @@ const props = defineProps<{
   facilities : FacilityLite[]   // not touched here, layers load from /geo APIs
   focusIds   : string[]         // EPA IDs shown in the current table page
   showAll    : boolean          // ⇐ toggle from the Store
+  hasSearched: boolean,
 }>()
 
 /* ————————————————————— internal handles ————————————————————— */
@@ -24,6 +25,7 @@ let subsBubbles : __esri.GeoJSONLayer
 let progSquares : __esri.GeoJSONLayer
 let accPoints   : __esri.GeoJSONLayer
 let accHeat     : __esri.GeoJSONLayer
+
 
 /* ———————————————————— initialise only once ———————————————————— */
 async function initMap () {
@@ -118,7 +120,7 @@ async function initMap () {
   subsBubbles = new GeoJSONLayer({
     id:'subs',
     url:'/api/facilities/geo',
-    title:'# Submissions',
+    title:'Submissions',
     objectIdField:'EPAFacilityID',
     visible:false,
     popupEnabled:false,
@@ -186,7 +188,7 @@ async function initMap () {
     id:'heat',
     url:'/api/accidents/geo',
     title:'Accident Heat',
-    visible:true,
+    visible:false,
     popupEnabled:false,
     renderer:{
       type:'heatmap',
@@ -200,10 +202,16 @@ async function initMap () {
     }
   })
 
-  map.addMany([facIcons, subsBubbles, progSquares, accPoints, accHeat])
+facIcons.title = 'Facilities (click a point for details)'
+accPoints.title = 'Accidents (click a point for details)'
+
+
+  // map.addMany([facIcons, subsBubbles, progSquares, accPoints, accHeat])
+  map.addMany([facIcons, accPoints, accHeat])
   
   view.ui.add(new Fullscreen({ view }), "top-left");  
   view.ui.add(new LayerList({ view }), 'bottom-right')
+  view.ui.add(new Legend({ view }), "bottom-left")
 
 //   view.on('click', async event => {
 //   const hit = await view.hitTest(event)
@@ -222,6 +230,8 @@ async function initMap () {
   applyFilter()   // initial filter
   zoomToFocus()   // and zoom
 }
+
+
 
 /* ————————— helper: build & apply definitionExpression ————————— */
 function applyFilter () {
@@ -266,6 +276,22 @@ watch(() => props.focusIds, () => {
 }, { deep:true })
 
 watch(() => props.showAll, applyFilter)
+
+// react to search completion: refresh layers and re-apply filter/zoom
+watch(() => props.hasSearched, (searchDone) => {
+  if (!searchDone || !view) return;
+
+  // reload data from the server
+  facIcons.refresh();
+  subsBubbles.refresh();
+  progSquares.refresh();
+  accPoints.refresh();
+  accHeat.refresh();
+
+  // re-apply filter and zoom to focused features
+  applyFilter();
+  zoomToFocus();
+})
 </script>
 
 <style scoped>

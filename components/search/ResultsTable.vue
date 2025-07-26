@@ -7,52 +7,93 @@ const props = defineProps<{
   total: number
   page: number
   perPage: number
+  hasSearched: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'page-changed', newPage: number): void
 }>()
 
-// total number of pages
-const totalPages = computed(() =>
-  Math.ceil(props.total / props.perPage)
-)
-
-// how many numbered buttons to show in the middle
+// pagination
+const totalPages = computed(() => Math.ceil(props.total / props.perPage))
 const windowSize = 5
-let loading = true
-
-// compute the sliding window of page numbers
 const visiblePages = computed(() => {
   const tp = totalPages.value
-  if (tp) loading = false
   const half = Math.floor(windowSize / 2)
   let start = Math.max(1, props.page - half)
-  let end = Math.min(tp, props.page + half)
-
-  // if we’re at the very start or end, extend the window
-  if (props.page <= half) {
-    end = Math.min(tp, windowSize)
-  }
-  if (props.page + half > tp) {
-    start = Math.max(1, tp - windowSize + 1)
-  }
-  const pages = []
-  for (let p = start; p <= end; p++) pages.push(p)
-  return pages
+  let end   = Math.min(tp, props.page + half)
+  if (props.page <= half) start = 1, end = Math.min(tp, windowSize)
+  if (props.page + half > tp) start = Math.max(1, tp - windowSize + 1), end = tp
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 
 function goto(p: number) {
-  if (p < 1 || p > totalPages.value || p === props.page) return
-  emit('page-changed', p)
+  if (p >= 1 && p <= totalPages.value && p !== props.page) {
+    emit('page-changed', p)
+  }
+}
+
+// export CSV
+function exportCSV() {
+  if (!props.rows.length) return
+  const header = ['EPA ID','Facility','State','City','Parent','Accidents']
+  const lines = props.rows.map(r => [
+    r.facilityId,
+    `"${r.facilityName.replace(/"/g,'""')}"`,
+    r.state,
+    r.city,
+    `"${(r.parentCompanyName||'').replace(/"/g,'""')}"`,
+    r.accidents?.length||0
+  ].join(','))
+  const csv = [header.join(','), ...lines].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'facilities_export.csv'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 </script>
 
 <template>
 
+  <div v-if="rows.length">
+    <div class="flex justify-end mb-2">
+      <button class="usa-button usa-button--outline" @click="exportCSV">
+        Export CSV
+      </button>
+    </div>
 
-    <nav class="usa-pagination !no-underline" v-if="totalPages > 1">
-    <ul class="usa-pagination__list">
+    <table class="usa-table usa-table--striped w-full">
+      <thead>
+        <tr>
+          <th>EPA ID</th><th>Facility</th><th>State</th><th>City</th>
+          <th>Parent Company</th><th>Last Validated</th><th>Accidents</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="r in rows" :key="r.facilityId">
+          <td>{{ r.facilityId }}</td>
+          <td>
+            <NuxtLink :to="`/facility/${r.facilityId}`">{{ r.facilityName }}</NuxtLink>
+          </td>
+          <td>{{ r.state }}</td>
+          <td>{{ r.city }}</td>
+          <td>{{ r.parentCompanyName || '—' }}</td>
+          <td>—</td>
+          <td>{{ r.accidents?.length ?? 0 }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- <p v-else class="usa-prose text-center">
+    Use the filters above and click “Search” to see facilities.
+  </p> -->
+
+<nav class="!no-underline w-full flex justify-center" v-if="totalPages > 1">
+    <ul class="w-fit flex justify-center">
       <!-- previous arrow -->
       <li class="usa-pagination__item usa-pagination__item--arrow ">
         <button
@@ -115,40 +156,9 @@ function goto(p: number) {
       </li>
     </ul>
   </nav>
-  
-  <table class="usa-table usa-table--striped usa-table--borderless w-full" v-if="rows.length">
-    <thead>
-      <tr>
-        <th>EPA ID</th>
-        <th>Facility</th>
-        <th>State</th>
-        <th>City</th>
-        <th>Parent Company</th>
-        <th>Last Validated</th>
-        <th>Accidents</th>
-      </tr>
-    </thead>
-<tbody>
-  <tr v-for="r in rows" :key="r.facilityId">
-    <td>{{ r.facilityId }}</td>
-    <td>
-      <NuxtLink :to="`/facility/${r.facilityId}`">{{ r.facilityName }}</NuxtLink>
-    </td>
-    <td>{{ r.state }}</td>
-    <td>{{ r.city }}</td>
-    <td>{{ r.parentCompanyName || '—' }}</td>
-    <td>—</td> <!-- You can replace this with a valid field if you later store last submission date -->
-    <td>{{ r.accidents?.length ?? 0 }}</td>
-  </tr>
-</tbody>
-  </table>
-
-  <p v-else class="usa-prose text-center">No matches.</p>
-
-
 </template>
 
 <style scoped>
 .usa-table { margin-top: 1rem; }
-.usa-pagination { display: flex; justify-content: center; margin: 1rem 0; }
+.usa-pagination { display: block; }
 </style>

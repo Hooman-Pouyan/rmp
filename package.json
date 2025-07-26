@@ -25,6 +25,7 @@
     "better-sqlite3": "^11.10.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",
+    "json2csv": "^6.0.0-alpha.2",
     "nuxt": "^3.17.2",
     "nuxt-uswds": "^1.0.2",
     "pg": "^8.16.0",
@@ -39,6 +40,7 @@
   "devDependencies": {
     "@nuxt/ui": "^3.1.1",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/json2csv": "^5.0.7",
     "@types/pg": "^8.15.4",
     "drizzle-kit": "^0.31.1",
     "wrangler": "^4.19.1"
