@@ -36,7 +36,7 @@ function goto(p: number) {
 // export CSV
 function exportCSV() {
   if (!props.rows.length) return
-  const header = ['EPA ID','Facility','State','City','Parent','Accidents']
+  const header = ['EPA ID','Facility','State','City','Parent','# Recent Accidents', "Submissions", "# All‐time Accidents"]
   const lines = props.rows.map(r => [
     r.facilityId,
     `"${r.facilityName.replace(/"/g,'""')}"`,

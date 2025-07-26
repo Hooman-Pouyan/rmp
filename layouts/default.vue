@@ -16,13 +16,13 @@ import AppFooter from './components/AppFooter.vue'
     </div>
   </section> -->
 
-  <AppHeader />
+  <!-- <AppHeader /> -->
 
   <main id="main-content" class="bg-base-lightest px-5">
     <slot />
   </main>
 
-  <AppFooter />
+  <!-- <AppFooter /> -->
 </template>
 
 <style scoped>

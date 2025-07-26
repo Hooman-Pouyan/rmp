@@ -75,7 +75,8 @@ async function initMap () {
     container: mapDiv.value!,
     map,
     center: [-96, 37.8],
-    zoom  : 4
+    zoom  : 4,
+    constraints: { snapToZoom:true }
   })
 
   /* ————————————— layers ————————————— */
@@ -212,6 +213,8 @@ accPoints.title = 'Accidents (click a point for details)'
   view.ui.add(new Fullscreen({ view }), "top-left");  
   view.ui.add(new LayerList({ view }), 'bottom-right')
   view.ui.add(new Legend({ view }), "bottom-left")
+
+  view.watch('zoom', z => { accHeat.visible = z >= 6 })
 
 //   view.on('click', async event => {
 //   const hit = await view.hitTest(event)

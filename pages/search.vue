@@ -105,16 +105,26 @@ function onFiltersUpdate(p: any) {
 <template>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit mt-5">
     <section class="col-span-2">
-
       <header class="usa-card__header !px-0">
         <h1 class="usa-card__heading text-3xl font-bold">Risk Management Plan</h1>
         <p class="text-lg pt-1">The Risk Management Plan (RMP) rule implements Section&nbsp;112(r) of the 1990 Clean Air Act …</p>
-        <bt />
         
-        <p class="usa-prose mb-4">
-          Enter one or more filter criteria (facility name, address, state, etc.), then click Search.  
-          You can also download your filtered results as an Excel file.
+        <p class="mb-4 ">
+          <h5>
+            <a href="https://www.data-liberation-project.org/" target="_blank">EPA Data Liberation Project</a>
+          </h5>
+          <div class="!text-sm">
+            Data obtained: <span class="text-blue-900"><time datetime="2025-04-19">July 6, 2025 (EPA Dataset)</time></span>
+            <br>
+            Collaborators: <span class="text-blue-900">Drexel University RMP Data Liberation Project</span>
+            <br>
+            Contact: <a href="mailto:joel@drexel.edu" class="text-blue-900">Joel Doe (joel@drexel.edu)</a>
+          </div>
         </p>
+        <div class="mt-3">
+            Enter one or more filter criteria (facility name, address, state, etc.), then click Search.  
+            You can also download your filtered results as an Excel file.
+        </div>
       </header>
       
       <!-- Map Column -->
@@ -129,7 +139,8 @@ function onFiltersUpdate(p: any) {
             <LocationSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
           </UsaAccordionItem>
           
-          <UsaAccordionItem ref="Process" label="Process">
+          <UsaAccordionItem ref="Process" label="Advanced">
+            <span>Search by chemical name or NAICS code here.</span>
             <ProcessSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
           </UsaAccordionItem>
           
@@ -143,7 +154,7 @@ function onFiltersUpdate(p: any) {
           <button class="usa-button usa-button--outline w-fit" @click="toggleShowAll">
             {{ store.showAll ? 'Show Paginated Data' : 'Show All Data' }}
           </button>
-          <button class="usa-button usa-button--outline" @click="clearFilters">Clear Filters</button>
+          <button class="usa-button usa-button--outline" @click="clearFilters">New Search</button>
           <button class="usa-button" @click="runSearch">Search</button>
     </div>
           <!-- <button class="usa-button" @click="toggleFilterDrawer">Filters</button> -->
