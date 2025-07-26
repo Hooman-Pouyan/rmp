@@ -1,5 +1,5 @@
 <template>
-  <section class="usa-prose h-[450px] flex flex-col justify-center items-start w-full">
+  <!-- <section class="usa-prose h-[450px] flex flex-col justify-center items-start w-full">
     <div class="w-fit h-fit bg-slate-200 p-5 rounded-lg space-y-1">
     <h1>Welcome to the RMP Viewer</h1>
     <p>
@@ -8,10 +8,15 @@
     </p>
     <NuxtLink to="/search" class="usa-button">Go to Search</NuxtLink>
     </div>
-  </section>
+  </section> -->
+  <search />
 </template>
 
+
+<search />
+
 <script setup lang="ts">
+import search from "./search.vue"
 // no extra logic
 </script>
 

@@ -96,7 +96,7 @@ async function initMap () {
         <br>
       <a href="${location.origin}/facility/{EPAFacilityID}"
          target="_blank" rel="noopener">
-         View facility detail
+         Go to Facility Detail Page
       </a>
     `
     },
@@ -180,7 +180,7 @@ async function initMap () {
         <a href='/accidents/{id}'></a>
               <a href="${location.origin}/accidents/{id}"
          target="_blank" rel="noopener">
-         View detail
+         Go to Accident Detail Page
       </a>`
     }
   })
