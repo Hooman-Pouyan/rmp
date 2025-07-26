@@ -26,7 +26,6 @@ let progSquares : __esri.GeoJSONLayer
 let accPoints   : __esri.GeoJSONLayer
 let accHeat     : __esri.GeoJSONLayer
 
-
 /* ———————————————————— initialise only once ———————————————————— */
 async function initMap () {
   if (!process.client) return
