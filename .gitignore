@@ -17,6 +17,7 @@ server/db/*.sqlite
 # Logs
 logs
 *.log
+/database.bak
 
 # Misc
 .DS_Store
