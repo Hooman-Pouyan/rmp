@@ -22,6 +22,7 @@ export interface FacilityLite {
   operatorName: string;
   noAccidents: string;
   programLevel: number;
+  
 
   accidents: Array<{
     accidentHistoryId: number;
@@ -29,6 +30,10 @@ export interface FacilityLite {
     accidentTime: string;
     // Add more fields if needed later
   }> | null;
+
+  recentAccidentsCount: number,
+  allAccidentsCount: number,
+  submissionsCount: number,
 
   submissions: Array<{
     submissionId: number;

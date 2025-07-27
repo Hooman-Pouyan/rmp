@@ -36,14 +36,16 @@ function goto(p: number) {
 // export CSV
 function exportCSV() {
   if (!props.rows.length) return
-  const header = ['EPA ID','Facility','State','City','Parent','# Recent Accidents', "Submissions", "# All‐time Accidents"]
+  const header = ['EPA ID','Facility','State','City','Parent Company', "# Submissions", 'Recent Accidents', "All‐time Accidents"]
   const lines = props.rows.map(r => [
     r.facilityId,
     `"${r.facilityName.replace(/"/g,'""')}"`,
     r.state,
     r.city,
     `"${(r.parentCompanyName||'').replace(/"/g,'""')}"`,
-    r.accidents?.length||0
+    r.submissionsCount || 0,
+    r.recentAccidentsCount || 0,
+    r.allAccidentsCount || 0,
   ].join(','))
   const csv = [header.join(','), ...lines].join('\n')
   const blob = new Blob([csv], { type: 'text/csv' })
@@ -69,7 +71,8 @@ function exportCSV() {
       <thead>
         <tr>
           <th>EPA ID</th><th>Facility</th><th>State</th><th>City</th>
-          <th>Parent Company</th><th>Last Validated</th><th>Accidents</th>
+          <th>Parent Company</th><th># Submissions</th>
+          <th>Recent Accidents</th><th>All‐time Accidents</th>
         </tr>
       </thead>
       <tbody>
@@ -81,8 +84,10 @@ function exportCSV() {
           <td>{{ r.state }}</td>
           <td>{{ r.city }}</td>
           <td>{{ r.parentCompanyName || '—' }}</td>
-          <td>—</td>
-          <td>{{ r.accidents?.length ?? 0 }}</td>
+          <!-- <td>—</td> -->
+          <td>{{ r.submissionsCount ?? "N/A" }}</td>
+          <td>{{ r.recentAccidentsCount ?? "N/A" }}</td>
+          <td>{{ r.allAccidentsCount ?? "N/A" }}</td>
         </tr>
       </tbody>
     </table>

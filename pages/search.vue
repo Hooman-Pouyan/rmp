@@ -103,7 +103,7 @@ function onFiltersUpdate(p: any) {
 
 
 <template>
-  <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit mt-5">
+  <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
     <section class="col-span-2">
       <header class="usa-card__header !px-0">
         <h1 class="usa-card__heading text-3xl font-bold">Risk Management Plan</h1>
@@ -182,6 +182,9 @@ function onFiltersUpdate(p: any) {
     <div v-if="store.loading && hasSearched" class="flex flex-col w-full h-fit items-center justify-center space-y-2 p-5">
       <span class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></span>
       <span>Retrieving Facilities …</span>
+    </div>
+    <div v-if="!store.loading && hasSearched && !store.results.length" class="flex flex-col w-full h-fit items-center justify-center space-y-2 p-5">
+      <span>No Result Found</span>
     </div>
 
   <div v-if="hasSearched && !store.loading" class="h-fit">

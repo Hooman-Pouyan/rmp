@@ -247,6 +247,7 @@ export default defineEventHandler(async (event) => {
     facMap[f.facilityId!] = {
       ...f,
       chemicals:    [] as any[],
+      submissions:  [] as any[],
       naicsCode:    null as string | null,
       programLevel: null as number | null,
       accidents:    [] as any[],
@@ -270,6 +271,14 @@ export default defineEventHandler(async (event) => {
         ? s.programLevel
         : Math.max(fac.programLevel, s.programLevel)
     }
+    // attach this submission to the facility
+    fac.submissions.push({
+      chemicalId:   s.chemicalId,
+      quantity:     s.quantity,
+      chemicalName: s.chemicalName,
+      naicsCode:    s.naicsCode,
+      programLevel: s.programLevel,
+    });
   })
 
   accRows.forEach(a => {
@@ -280,11 +289,25 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  /* ─────────────────────────── 9. final payload ─────────────────────────── */
+  // ─── 8.5 Compute counts ─────────────────────────
+  Object.values(facMap).forEach(f => {
+    // all-time accidents
+    f.allAccidentsCount = f.accidents.length;
+    // recent accidents: in last 5 years
+    const fiveYearsAgo = new Date();
+    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+    f.recentAccidentsCount = f.accidents.filter((acc: any) => new Date(acc.accidentDate) >= fiveYearsAgo).length;
+  });
+
+  // ─────────────────────────── 9. final payload ───────────────────────────
   const facilities = Object.values(facMap).map(f => ({
     ...f,
-    accidents: f.accidents.length ? f.accidents : null,
-  }))
+    submissions:        f.submissions,
+    submissionsCount:   f.submissions.length,
+    recentAccidentsCount: f.recentAccidentsCount,
+    allAccidentsCount:    f.allAccidentsCount,
+    accidents:            f.accidents.length ? f.accidents : null,
+  }));
 
   return {
     total,

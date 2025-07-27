@@ -283,13 +283,6 @@ watch(() => props.showAll, applyFilter)
 watch(() => props.hasSearched, (searchDone) => {
   if (!searchDone || !view) return;
 
-  // reload data from the server
-  facIcons.refresh();
-  subsBubbles.refresh();
-  progSquares.refresh();
-  accPoints.refresh();
-  accHeat.refresh();
-
   // re-apply filter and zoom to focused features
   applyFilter();
   zoomToFocus();
