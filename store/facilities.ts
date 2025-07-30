@@ -56,7 +56,8 @@ export const useFacilitiesStore = defineStore('fac', {
 
     /* last filter payload */
     filters : {} as Record<string,any>,
-    showAll: false, // <-- Add this line
+    showAll: true, // <-- Add this line
+    submissionDate: null as string | null,
     loading : true
   }),
 
@@ -109,6 +110,10 @@ export const useFacilitiesStore = defineStore('fac', {
     async goToPage(newPage:number){
       this.filters.page = newPage
       await this.search(this.filters)
+    },
+    
+    setSubmissionDate(date:string|null){  
+      this.submissionDate = date
     }
   }
 })

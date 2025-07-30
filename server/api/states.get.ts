@@ -71,10 +71,15 @@ export default defineEventHandler(async (event) => {
       const url = `https://data-liberation-project.github.io/epa-rmp-viewer/data/facilities/by-state/${abbr}.json`;
       try {
         const res = await fetch(url);
-        if (!res.ok) continue;
+        if (!res.ok) {
+        // cache an empty placeholder so the UI still works
+        fetched.push({ name: abbr, abbr, counties: [] } as StateFacilities)
+        continue;
+      }
         const json = (await res.json()) as StateFacilities;
         fetched.push(json);
       } catch {
+        fetched.push({ name: abbr, abbr, counties: [] } as StateFacilities)
         continue;
       }
     }

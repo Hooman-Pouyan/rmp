@@ -8,6 +8,9 @@ import ProcessSection from '~/components/search/ProcessSection.vue'
 import ResultsTable from '~/components/search/ResultsTable.vue'
 import ArcFacilitiesMap from '~/components/ArcFacilitiesMap.vue'
 import AccidentSection  from '~/components/search/AccidentSection.vue'
+import submissionSection  from '~/components/search/submissionSection.vue'
+import { useFetch } from 'nuxt/app'
+
 
 const filters: any = reactive({
   facilityName: '',
@@ -26,6 +29,7 @@ const filters: any = reactive({
   chemicals: [] as string[],
   chemicalType: '',
   programLevel: '',
+  submissionDate: null as string | null,
   naicsCodes: [] as string[],
   hasAccidents:false,
   accFromDate :'',
@@ -37,6 +41,10 @@ const filters: any = reactive({
 })
 
 const hasSearched = ref(false)
+const totalAccidents = ref<number | null>(null)
+
+useFetch<{ totalAccidents:number }>('/api/accidents/count')
+  .then(({ data }) => { totalAccidents.value = data.value?.totalAccidents ?? null })
 
 const filtersModel = computed({
   get: () => filters,
@@ -103,13 +111,43 @@ function onFiltersUpdate(p: any) {
 
 
 <template>
+  <!-- About this Map (collapsible) -->
+      <UsaAccordion bordered class="mt-4 mb-6">
+        <UsaAccordionItem label="About this map">
+          <p class="mb-2">
+            Following the release of the new <b>Safer Communities by Chemical Accident Prevention (SCCAP)</b> rule finalized in 2024, the U.S. Environmental Protection Agency (EPA) published a public data tool to help communities understand hazards at highly hazardous chemical plants across the United States. That tool was removed on&nbsp;<time datetime="2025-04-18">April 18, 2025</time> by the Trump administration.
+          </p>
+
+          <p class="mb-2">
+            This map was created by Drexel University’s <strong>Environmental Collaboratory</strong> in partnership with the Environmental Justice Health Alliance for Chemical Policy Reform (EJHA) so that impacted communities can still access facility information in their backyards.
+          </p>
+
+          <p class="mb-2">
+            It contains only the publicly available, non-confidential portions of Risk Management Plans (RMPs) that chemical companies submit to EPA under the Clean Air Act—hence the term “accident” for incidents that are entirely preventable.
+          </p>
+
+          <p class="mb-2">
+            The underlying data were hosted on EPA’s site from <time datetime="2024-03-01">March 2024</time> to <time datetime="2025-04-18">April 18, 2025</time>.  
+            This snapshot was obtained by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a> on
+            <time datetime="2025-07-06">July 6, 2025</time> &nbsp;— see their
+            <a href="https://www.data-liberation-project.org/methodology" target="_blank" class="text-blue-600 underline">methodology</a>.
+          </p>
+
+          <p class="mb-2">
+            Because facilities must update their RMPs every five years, incidents after the snapshot date may not be included.
+          </p>
+
+          <p>
+            Questions? Contact <a href="mailto:joel@drexel.edu" class="text-blue-600 underline">Joel Doe</a>.
+          </p>
+        </UsaAccordionItem>
+      </UsaAccordion>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
     <section class="col-span-2">
       <header class="usa-card__header !px-0">
         <h1 class="usa-card__heading text-3xl font-bold">Risk Management Plan</h1>
         <p class="text-lg pt-1">The Risk Management Plan (RMP) rule implements Section&nbsp;112(r) of the 1990 Clean Air Act …</p>
-        
-        <p class="mb-4 ">
+        <!-- <p class="mb-4 ">
           <h5>
             <a href="https://www.data-liberation-project.org/" target="_blank">EPA Data Liberation Project</a>
           </h5>
@@ -120,7 +158,7 @@ function onFiltersUpdate(p: any) {
             <br>
             Contact: <a href="mailto:joel@drexel.edu" class="text-blue-900">Joel Doe (joel@drexel.edu)</a>
           </div>
-        </p>
+        </p> -->
         <div class="mt-3">
             Enter one or more filter criteria (facility name, address, state, etc.), then click Search.  
             You can also download your filtered results as an Excel file.
@@ -131,21 +169,21 @@ function onFiltersUpdate(p: any) {
       
       <div class="space-y-4">
         <UsaAccordion bordered class="margin-bottom-2 usa-accordion--multiselectable">
-          <UsaAccordionItem ref="facility" label="Facility" open>
-            <FacilitySection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
-          </UsaAccordionItem>
-          
           <UsaAccordionItem  ref="Location" label="Location">
             <LocationSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
           </UsaAccordionItem>
-          
+          <UsaAccordionItem ref="facility" label="Facility" open>
+            <FacilitySection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
+          </UsaAccordionItem>
           <UsaAccordionItem ref="Process" label="Advanced">
             <span>Search by chemical name or NAICS code here.</span>
             <ProcessSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
           </UsaAccordionItem>
-          
           <UsaAccordionItem ref="Accidents" label="Accidents">
             <AccidentSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
+          </UsaAccordionItem>
+          <UsaAccordionItem ref="Submissions" label="Submissions">
+            <submissionSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
           </UsaAccordionItem>
         </UsaAccordion>
         
@@ -154,7 +192,7 @@ function onFiltersUpdate(p: any) {
           <button class="usa-button usa-button--outline w-fit" @click="toggleShowAll">
             {{ store.showAll ? 'Show Paginated Data' : 'Show All Data' }}
           </button>
-          <button class="usa-button usa-button--outline" @click="clearFilters">New Search</button>
+          <button class="usa-button usa-button--outline" @click="clearFilters">Clear All Filters</button>
           <button class="usa-button" @click="runSearch">Search</button>
     </div>
           <!-- <button class="usa-button" @click="toggleFilterDrawer">Filters</button> -->
@@ -164,6 +202,9 @@ function onFiltersUpdate(p: any) {
       
   <!-- Results Section -->
   <section class="my-4 col-span-4 h-full overflow-x-hidden overflow-y-hidden space-y-3">
+    <div v-if="totalAccidents !== null" class="font-semibold text-lg pb-2">
+      Total accidents on record: {{ totalAccidents.toLocaleString() }}
+    </div>
     <client-only>
     <ArcFacilitiesMap
     class="pb-5"

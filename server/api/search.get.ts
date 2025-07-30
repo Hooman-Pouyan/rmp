@@ -8,8 +8,10 @@ import {
   tbls1ProcessNaics,
   tbls6Accidenthistory,
   tlkpchemicals,
+  tblrmptrack
 } from '../../drizzle/schema'
 import { eq, ilike, and, sql, inArray, gte, lte } from 'drizzle-orm'
+
 
 export default defineEventHandler(async (event) => {
   /* ─────────────────────────── 1. read/query-params ────────────────────────── */
@@ -27,6 +29,9 @@ export default defineEventHandler(async (event) => {
   const facilityDUNS      = first(q.facilityDUNS).trim()
   const address           = first(q.address).trim()
   const exactAddress      = toBool(q.exactAddress)
+  const submissionDate = first(q.submissionDate) || null     // YYYY-MM-DD | 'ALL'
+  const latestOnly     = submissionDate == null              // null → latest
+  const cumulative     = submissionDate === 'ALL'            // 'ALL' → every accident
   const city              = first(q.city).trim()
   const state             = first(q.state).toUpperCase().trim()
   const zip               = first(q.zip).trim()
@@ -82,12 +87,26 @@ export default defineEventHandler(async (event) => {
   if (state) facWhere.push(eq(tbls1Facilities.facilityState, state))
   if (zip)   facWhere.push(eq(tbls1Facilities.facilityZipCode, zip))
   facWhere.push(
-  eq(tbls1Facilities.validLatLongFlag, 'Yes')
+  facWhere.push(sql`${tbls1Facilities.validLatLongFlag} = 'Yes'`)
 )
   facWhere.push(
   sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision) >= 0`,
   sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision) < 0`
 )
+
+// if (latestOnly) {
+//   facWhere.push(sql`
+//     (tblrmptrack."ReceiptDate", tblrmptrack."FacilityID") IN (
+//       SELECT MAX("ReceiptDate"), \"FacilityID\"
+//       FROM ${tblrmptrack}
+//       GROUP BY \"FacilityID\"
+//     )
+//   `)
+// } else if (!cumulative) {
+//   facWhere.push(sql`
+//     tblrmptrack."ReceiptDate"::date = ${submissionDate}
+//   `)
+// }
 
   /* 2b. process conditions */
   const procWhere: any[] = []
@@ -184,6 +203,9 @@ export default defineEventHandler(async (event) => {
     .from(tbls1Facilities)
     .innerJoin(paged, eq(tbls1Facilities.epaFacilityId, paged.epaId))
     .execute()
+
+      //   .leftJoin(tblrmptrack,
+      // eq(tblrmptrack.epaFacilityId, tbls1Facilities.epaFacilityId))
 
   /* ─────────────────── 6. processes / chemicals / NAICS ─────────────────── */
   const subRows = await db

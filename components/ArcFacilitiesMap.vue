@@ -7,7 +7,9 @@ import '@arcgis/core/assets/esri/themes/light/main.css'
 import { ref, onMounted, watch } from 'vue'
 import type { FacilityLite }      from '~/core/types/facility'
 import { useRouter } from '#app'    // top of <script setup>
+import { useFacilitiesStore } from '~/store/facilities'
 const router = useRouter()
+const store = useFacilitiesStore()
 
 const props = defineProps<{
   facilities : FacilityLite[]   // not touched here, layers load from /geo APIs
@@ -33,8 +35,10 @@ async function initMap () {
   const [
     esriConfigMod, BasemapMod, BasemapStyleMod,
     MapMod, MapViewMod, GeoJSONLayerMod,
-    LayerListMod, LegendMod, FullscreenMod, 
+    LayerListMod, LegendMod,
+    SearchMod,
     // BasemapGalleryMod
+    FullscreenMod, 
   ] = await Promise.all([
     import('@arcgis/core/config.js'),
     import('@arcgis/core/Basemap.js'),
@@ -44,6 +48,7 @@ async function initMap () {
     import('@arcgis/core/layers/GeoJSONLayer.js'),
     import('@arcgis/core/widgets/LayerList.js'),
     import('@arcgis/core/widgets/Legend.js'),
+    import('@arcgis/core/widgets/Search.js'),
     // import("@arcgis/core/widgets/BasemapGallery.js"),
     import("@arcgis/core/widgets/Fullscreen.js")
   ])
@@ -56,6 +61,7 @@ async function initMap () {
   const GeoJSONLayer = GeoJSONLayerMod.default
   const LayerList    = LayerListMod.default
   const Legend       = LegendMod.default
+  const Search       = SearchMod.default
   const Fullscreen       = FullscreenMod.default
   // const BasemapGallery       = BasemapGalleryMod.default
 
@@ -159,7 +165,9 @@ async function initMap () {
 
   accPoints = new GeoJSONLayer({
     id:'acc',
-    url:'/api/accidents/geo',
+    url : `/api/accidents/geo?${ store.submissionDate
+            ? `submissionDate=${store.submissionDate}`
+            : 'latestOnly=true' }`,
     title:'Accidents',
     renderer:{
       type:'simple',
@@ -186,7 +194,9 @@ async function initMap () {
 
   accHeat = new GeoJSONLayer({
     id:'heat',
-    url:'/api/accidents/geo',
+    url : `/api/accidents/geo?${ store.submissionDate
+            ? `submissionDate=${store.submissionDate}`
+            : 'latestOnly=true' }`,
     title:'Accident Heat',
     visible:false,
     popupEnabled:false,
@@ -210,6 +220,15 @@ accPoints.title = 'Accidents (click a point for details)'
   map.addMany([facIcons, accPoints, accHeat])
   
   view.ui.add(new Fullscreen({ view }), "top-left");  
+
+  // ── address search bar (zoom to any typed address) ─────────
+  const searchWidget = new Search({
+    view,
+    includeDefaultSources: true,
+    allPlaceholder: 'Enter address to zoom',
+  })
+  view.ui.add(searchWidget, { position: 'top-right', index: 0 })
+
   view.ui.add(new LayerList({ view }), 'bottom-right')
   view.ui.add(new Legend({ view }), "bottom-left")
 
@@ -286,6 +305,15 @@ watch(() => props.hasSearched, (searchDone) => {
   // re-apply filter and zoom to focused features
   applyFilter();
   zoomToFocus();
+})
+
+watch(() => store.submissionDate, (d) => {
+  if (!accPoints || !accHeat) return
+  const q = d ? `submissionDate=${d}` : 'latestOnly=true'
+  accPoints.url = `/api/accidents/geo?${q}`
+  accHeat.url   = `/api/accidents/geo?${q}`
+  accPoints.refresh()
+  accHeat.refresh()
 })
 </script>
 
