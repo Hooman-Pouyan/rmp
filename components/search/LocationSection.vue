@@ -27,7 +27,7 @@ watch(() => f.state, async (abbr) => {
   }
   const res = await fetch(`/api/states?abbr=${abbr || ''}`)
   const json = await res.json()
-  counties.value = json.counties
+  counties.value = json[0].counties
   set('county', '')
 })
 </script>
@@ -94,7 +94,7 @@ watch(() => f.state, async (abbr) => {
           id="county"
           class="usa-select"
           :value="f.county"
-          :disabled="!counties.length"
+          :disabled="!counties?.length"
           @change="e => set('county', (e.target as HTMLSelectElement).value)"
         >
           <option value="">Select county</option>
