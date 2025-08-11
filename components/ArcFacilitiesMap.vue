@@ -16,7 +16,12 @@ const props = defineProps<{
   focusIds   : string[]         // EPA IDs shown in the current table page
   showAll    : boolean          // ⇐ toggle from the Store
   hasSearched: boolean,
+  submissionDate: string | null   // ← add this
 }>()
+
+const qStr = props.submissionDate
+  ? `submissionDate=${encodeURIComponent(props.submissionDate)}`
+  : 'latestOnly=true'
 
 /* ————————————————————— internal handles ————————————————————— */
 const mapDiv = ref<HTMLDivElement>()
@@ -35,7 +40,7 @@ async function initMap () {
   const [
     esriConfigMod, BasemapMod, BasemapStyleMod,
     MapMod, MapViewMod, GeoJSONLayerMod,
-    LayerListMod, LegendMod,
+    LayerListMod,
     SearchMod,
     // BasemapGalleryMod
     FullscreenMod, 
@@ -47,7 +52,6 @@ async function initMap () {
     import('@arcgis/core/views/MapView.js'),
     import('@arcgis/core/layers/GeoJSONLayer.js'),
     import('@arcgis/core/widgets/LayerList.js'),
-    import('@arcgis/core/widgets/Legend.js'),
     import('@arcgis/core/widgets/Search.js'),
     // import("@arcgis/core/widgets/BasemapGallery.js"),
     import("@arcgis/core/widgets/Fullscreen.js")
@@ -60,7 +64,6 @@ async function initMap () {
   const MapView      = MapViewMod.default
   const GeoJSONLayer = GeoJSONLayerMod.default
   const LayerList    = LayerListMod.default
-  const Legend       = LegendMod.default
   const Search       = SearchMod.default
   const Fullscreen       = FullscreenMod.default
   // const BasemapGallery       = BasemapGalleryMod.default
@@ -110,16 +113,6 @@ async function initMap () {
       symbol: { type:'simple-marker', style:'circle',
                 color:'#0070f3', size:8,
                 outline:{ color:'white', width:0.5 } }
-    },
-    featureReduction: {
-      type:'cluster',
-      clusterRadius:'60px',
-      labelingInfo:[{
-        deconflictionStrategy:'none',
-        labelExpressionInfo:{ expression:'Text($feature.cluster_count)' },
-        symbol:{ type:'text', color:'white', haloColor:'black', haloSize:1,
-                 font:{ size:12, weight:'bold' } }
-      }]
     }
   })
 
@@ -138,8 +131,7 @@ async function initMap () {
         type:'size', field:'subs',
         stops:[ {value:1,size:6},{value:5,size:16},{value:15,size:28} ]
       }]
-    },
-    featureReduction: facIcons.featureReduction   // identical clustering
+    }
   })
 
   progSquares = new GeoJSONLayer({
@@ -165,9 +157,7 @@ async function initMap () {
 
   accPoints = new GeoJSONLayer({
     id:'acc',
-    url : `/api/accidents/geo?${ store.submissionDate
-            ? `submissionDate=${store.submissionDate}`
-            : 'latestOnly=true' }`,
+    url : `/api/accidents/geo?${qStr}`,
     title:'Accidents',
     renderer:{
       type:'simple',
@@ -176,27 +166,24 @@ async function initMap () {
                outline:{ color:'white', width:0.5 } }
     },
     popupTemplate:{
-      title:'Accident #{id}',
-      content:`
-        <strong>Date:</strong> {accidentDate}<br>
-        <strong>Time:</strong> {accidentTime}<br>
+      title: '{name}',
+      content: `
+        <strong>EPA ID:</strong> {EPAFacilityID}<br>
+        <strong>Date:</strong> {accidentDate} &nbsp; <strong>Time:</strong> {accidentTime}<br>
         <strong>NAICS:</strong> {naicsCode}<br>
-        <strong>Duration:</strong> {releaseDuration}<br>
-        <strong>Explosion:</strong> {reExplosion}<br>
-        <strong>Fire:</strong> {reFire}<br>
-        <a href='/accidents/{id}'></a>
-              <a href="${location.origin}/accidents/{id}"
-         target="_blank" rel="noopener">
-         Go to Accident Detail Page
-      </a>`
+        <a href="${location.origin}/facility/{EPAFacilityID}" target="_blank" rel="noopener">
+          View Facility
+        </a> &nbsp;|&nbsp;
+        <a href="${location.origin}/accidents/{id}" target="_blank" rel="noopener">
+          Accident Details
+        </a>
+      `
     }
   })
 
   accHeat = new GeoJSONLayer({
     id:'heat',
-    url : `/api/accidents/geo?${ store.submissionDate
-            ? `submissionDate=${store.submissionDate}`
-            : 'latestOnly=true' }`,
+    url : `/api/accidents/geo?${ qStr}`,
     title:'Accident Heat',
     visible:false,
     popupEnabled:false,
@@ -217,7 +204,7 @@ accPoints.title = 'Accidents (click a point for details)'
 
 
   // map.addMany([facIcons, subsBubbles, progSquares, accPoints, accHeat])
-  map.addMany([facIcons, accPoints, accHeat])
+  map.addMany([facIcons, accPoints])
   
   view.ui.add(new Fullscreen({ view }), "top-left");  
 
@@ -230,7 +217,6 @@ accPoints.title = 'Accidents (click a point for details)'
   view.ui.add(searchWidget, { position: 'top-right', index: 0 })
 
   view.ui.add(new LayerList({ view }), 'bottom-right')
-  view.ui.add(new Legend({ view }), "bottom-left")
 
   view.watch('zoom', z => { accHeat.visible = z >= 6 })
 
@@ -309,7 +295,7 @@ watch(() => props.hasSearched, (searchDone) => {
 
 watch(() => store.submissionDate, (d) => {
   if (!accPoints || !accHeat) return
-  const q = d ? `submissionDate=${d}` : 'latestOnly=true'
+ const q = d ? `submissionDate=${encodeURIComponent(d)}` : 'latestOnly=true'
   accPoints.url = `/api/accidents/geo?${q}`
   accHeat.url   = `/api/accidents/geo?${q}`
   accPoints.refresh()

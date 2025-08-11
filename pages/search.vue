@@ -42,9 +42,13 @@ const filters: any = reactive({
 
 const hasSearched = ref(false)
 const totalAccidents = ref<number | null>(null)
+const latestAccidents = ref<number | null>(null)
 
-useFetch<{ totalAccidents:number }>('/api/accidents/count')
-  .then(({ data }) => { totalAccidents.value = data.value?.totalAccidents ?? null })
+useFetch<{ totalAccidents:number; latestAccidents:number }>('/api/accidents/count')
+  .then(({ data }) => {
+    totalAccidents.value = data.value?.totalAccidents ?? null
+    latestAccidents.value = data.value?.latestAccidents ?? null
+  })
 
 const filtersModel = computed({
   get: () => filters,
@@ -115,26 +119,23 @@ function onFiltersUpdate(p: any) {
       <UsaAccordion bordered class="mt-4 mb-6">
         <UsaAccordionItem label="About this map">
           <p class="mb-2">
-            Following the release of the new <b>Safer Communities by Chemical Accident Prevention (SCCAP)</b> rule finalized in 2024, the U.S. Environmental Protection Agency (EPA) published a public data tool to help communities understand hazards at highly hazardous chemical plants across the United States. That tool was removed on&nbsp;<time datetime="2025-04-18">April 18, 2025</time> by the Trump administration.
+            Following the release of the new <b>Safer Communities by Chemical Accident Prevention (SCCAP)</b> rule finalized in 2024, the U.S. Environmental Protection Agency (EPA) released a public data tool to help the public understand the hazards associated with the most highly hazardous chemical plants across the United States. This information is <b>no longer available on EPA’s website</b>.
           </p>
 
           <p class="mb-2">
-            This map was created by Drexel University’s <strong>Environmental Collaboratory</strong> in partnership with the Environmental Justice Health Alliance for Chemical Policy Reform (EJHA) so that impacted communities can still access facility information in their backyards.
+            This map was developed by The <strong>Environmental Collaboratory</strong> at Drexel University, in collaboration with the Environmental Justice Health Alliance for Chemical Policy Reform (EJHA), so that impacted communities <em>(residents, emergency responders, and local governments)</em> can still access facility information in their backyards. While the information displayed on this site was formatted by Drexel, the underlying data come from the U.S. EPA (see below), and neither Drexel nor EJHA make any claims about the accuracy or currency of the data.
           </p>
 
           <p class="mb-2">
-            It contains only the publicly available, non-confidential portions of Risk Management Plans (RMPs) that chemical companies submit to EPA under the Clean Air Act—hence the term “accident” for incidents that are entirely preventable.
+            The information used on this map only includes publicly available and non‑confidential portions of Risk Management Plans submitted by chemical companies to the EPA as part of compliance with the Risk Management Program (RMP) under the Clean Air Act.
           </p>
 
           <p class="mb-2">
-            The underlying data were hosted on EPA’s site from <time datetime="2024-03-01">March 2024</time> to <time datetime="2025-04-18">April 18, 2025</time>.  
-            This snapshot was obtained by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a> on
-            <time datetime="2025-07-06">July 6, 2025</time> &nbsp;— see their
-            <a href="https://www.data-liberation-project.org/methodology" target="_blank" class="text-blue-600 underline">methodology</a>.
+            This information was previously available on EPA’s website from <time datetime="2024-03-01">March 2024</time> to <time datetime="2025-04-18">April 18, 2025</time>. The underlying data for this project were obtained by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a> — see their <a href="https://www.data-liberation-project.org/methodology" target="_blank" class="text-blue-600 underline">methodology</a>.
           </p>
 
           <p class="mb-2">
-            Because facilities must update their RMPs every five years, incidents after the snapshot date may not be included.
+            Since the RMP rule requires that facilities update their Risk Management Plans every five years, the data included here represent submissions received by <time datetime="2025-07-06">July 6, 2025</time>, and may not include incidents that occurred within the last five years.
           </p>
 
           <p>
@@ -182,9 +183,9 @@ function onFiltersUpdate(p: any) {
           <UsaAccordionItem ref="Accidents" label="Accidents">
             <AccidentSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
           </UsaAccordionItem>
-          <UsaAccordionItem ref="Submissions" label="Submissions">
+          <!-- <UsaAccordionItem ref="Submissions" label="Submissions">
             <submissionSection v-model="filtersModel" @update:modelValue="onFiltersUpdate" />
-          </UsaAccordionItem>
+          </UsaAccordionItem> -->
         </UsaAccordion>
         
         <div class="flex justify-end gap-2">
@@ -202,8 +203,9 @@ function onFiltersUpdate(p: any) {
       
   <!-- Results Section -->
   <section class="my-4 col-span-4 h-full overflow-x-hidden overflow-y-hidden space-y-3">
-    <div v-if="totalAccidents !== null" class="font-semibold text-lg pb-2">
-      Total accidents on record: {{ totalAccidents.toLocaleString() }}
+    <div v-if="totalAccidents !== null && latestAccidents !== null" class="font-semibold text-lg pb-2">
+      Accidents on record: {{ totalAccidents.toLocaleString() }}
+      <span class="text-gray-600"> (last 5 years: {{ latestAccidents.toLocaleString() }})</span>
     </div>
     <client-only>
     <ArcFacilitiesMap

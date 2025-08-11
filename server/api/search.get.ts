@@ -86,9 +86,7 @@ export default defineEventHandler(async (event) => {
   if (city)  facWhere.push(eq(sql`lower(${tbls1Facilities.facilityCity})`, city.toLowerCase()))
   if (state) facWhere.push(eq(tbls1Facilities.facilityState, state))
   if (zip)   facWhere.push(eq(tbls1Facilities.facilityZipCode, zip))
-  facWhere.push(
   facWhere.push(sql`${tbls1Facilities.validLatLongFlag} = 'Yes'`)
-)
   facWhere.push(
   sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision) >= 0`,
   sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision) < 0`
@@ -211,6 +209,7 @@ export default defineEventHandler(async (event) => {
   const subRows = await db
     .select({
       facilityId:   tbls1Facilities.epaFacilityId,
+      processId:    tbls1Processes.processId,
       chemicalId:   tbls1Processchemicals.chemicalId,
       quantity:     tbls1Processchemicals.quantity,
       chemicalName: tlkpchemicals.chemicalName,
@@ -269,7 +268,8 @@ export default defineEventHandler(async (event) => {
     facMap[f.facilityId!] = {
       ...f,
       chemicals:    [] as any[],
-      submissions:  [] as any[],
+      // keep an internal set for unique processes to compute submissionsCount
+      _procIds:     new Set<number>(),
       naicsCode:    null as string | null,
       programLevel: null as number | null,
       accidents:    [] as any[],
@@ -293,14 +293,10 @@ export default defineEventHandler(async (event) => {
         ? s.programLevel
         : Math.max(fac.programLevel, s.programLevel)
     }
-    // attach this submission to the facility
-    fac.submissions.push({
-      chemicalId:   s.chemicalId,
-      quantity:     s.quantity,
-      chemicalName: s.chemicalName,
-      naicsCode:    s.naicsCode,
-      programLevel: s.programLevel,
-    });
+    // record unique process ids to approximate submissions count
+    if (s.processId != null) {
+      fac._procIds.add(Number(s.processId))
+    }
   })
 
   accRows.forEach(a => {
@@ -319,17 +315,25 @@ export default defineEventHandler(async (event) => {
     const fiveYearsAgo = new Date();
     fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
     f.recentAccidentsCount = f.accidents.filter((acc: any) => new Date(acc.accidentDate) >= fiveYearsAgo).length;
+    // submissions count = number of unique processes (prevents huge duplicates)
+    f.submissionsCount = f._procIds ? f._procIds.size : 0
   });
 
   // ─────────────────────────── 9. final payload ───────────────────────────
-  const facilities = Object.values(facMap).map(f => ({
-    ...f,
-    submissions:        f.submissions,
-    submissionsCount:   f.submissions.length,
-    recentAccidentsCount: f.recentAccidentsCount,
-    allAccidentsCount:    f.allAccidentsCount,
-    accidents:            f.accidents.length ? f.accidents : null,
-  }));
+  const facilities = Object.values(facMap).map(f => {
+    const {
+      _procIds, // strip internal set from response
+      ...rest
+    } = f
+    return {
+      ...rest,
+      // submissions: [], // keep shape but avoid payload bloat
+      // submissionsCount: f.submissionsCount ?? (_procIds ? _procIds.size : 0),
+      recentAccidentsCount: f.recentAccidentsCount,
+      allAccidentsCount: f.allAccidentsCount,
+      accidents: f.accidents.length ? f.accidents : null,
+    }
+  })
 
   return {
     total,

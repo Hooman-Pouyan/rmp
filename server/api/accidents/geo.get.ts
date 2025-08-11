@@ -1,77 +1,112 @@
 // server/api/accidents/geo.get.ts
-import { defineEventHandler } from 'h3'
+import { defineEventHandler, getQuery, setHeader } from 'h3'
 import { db } from '../../utils/drizzle.server'
 import {
   tbls6Accidenthistory,
-  tbls6Accidentchemicals,
-  tlkpchemicals,
   tbls1Facilities
 } from '~/drizzle/schema'
 import { eq, sql, and } from 'drizzle-orm'
-import { useFacilitiesStore } from '~/store/facilities'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  const q = getQuery(event) as Record<string, string | undefined>
 
-    // const store = useFacilitiesStore()
-  const rows = await db
+  // New UI param (preferred): 'latest' | 'all'
+  const range = String(q.range || '').toLowerCase()
+  const uiLatest = range === 'latest'
+  const uiAll    = range === 'all'
+
+  // Back-compat / existing behavior
+  const submissionDate = q.submissionDate || null              // 'YYYY-MM-DD' | 'ALL' | null
+  const latestOnly     = uiLatest || (!submissionDate && String(q.latestOnly || '').toLowerCase() === 'true')
+  const cumulative     = uiAll    || submissionDate === 'ALL'
+
+  // Optional bounding box for large maps (lon/lat in WGS84)
+  // minx, miny, maxx, maxy = west, south, east, north
+  const minx = q.minx ? Number(q.minx) : null
+  const miny = q.miny ? Number(q.miny) : null
+  const maxx = q.maxx ? Number(q.maxx) : null
+  const maxy = q.maxy ? Number(q.maxy) : null
+  const hasBBox = [minx, miny, maxx, maxy].every(v => typeof v === 'number' && !Number.isNaN(v as number))
+
+  // ── simple in‑memory cache (5 min)
+  const cacheKey = JSON.stringify({ range, submissionDate, latestOnly, cumulative, minx, miny, maxx, maxy })
+  const now = Date.now()
+  const CACHE_TTL = 5 * 60 * 1000
+  const g: any = globalThis as any
+  g.__accCache = g.__accCache || new Map<string, { t:number; data:any }>()
+  const cached = g.__accCache.get(cacheKey)
+  if (cached && (now - cached.t) < CACHE_TTL) {
+    setHeader(event, 'Cache-Control', 'public, max-age=300')
+    return cached.data
+  }
+
+  // ── base select (only required fields), join facilities once
+  const rowsQ = db
     .select({
-      id:               tbls6Accidenthistory.accidentHistoryId,
-      facilityId:       tbls6Accidenthistory.facilityId,
+      id:            tbls6Accidenthistory.accidentHistoryId,
+      facilityId:    tbls6Accidenthistory.facilityId,
       EPAFacilityID: tbls1Facilities.epaFacilityId,
-      date:             tbls6Accidenthistory.accidentDate,
-      time:             tbls6Accidenthistory.accidentTime,
-      naicsCode:        tbls6Accidenthistory.naicsCode,
-      releaseDuration:  tbls6Accidenthistory.accidentReleaseDuration,
-      reGas:            tbls6Accidenthistory.reGas,
-      reSpill:          tbls6Accidenthistory.reSpill,
-      reFire:           tbls6Accidenthistory.reFire,
-      reExplosion:      tbls6Accidenthistory.reExplosion,
-      initiatingEvent:  tbls6Accidenthistory.initiatingEvent,
-      cfEquipment:      tbls6Accidenthistory.cfEquipmentFailure,
-      cfHumanError:     tbls6Accidenthistory.cfHumanError,
-      // … any other columns you want …
-
-      lat: tbls1Facilities.facilityLatDecDegs,
-      lon: tbls1Facilities.facilityLongDecDegs
+      facilityName:  tbls1Facilities.facilityName,
+      date:          tbls6Accidenthistory.accidentDate,
+      time:          tbls6Accidenthistory.accidentTime,
+      naicsCode:     tbls6Accidenthistory.naicsCode,
+      // cast to numeric in SQL to avoid per-row parse
+      lat:           sql<number>`TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision`.mapWith(Number),
+      lon:           sql<number>`TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision`.mapWith(Number),
     })
-    .from(tbls6Accidenthistory).where(
-      and(
-      sql`(${tbls1Facilities.validLatLongFlag} = 'Yes')`,
-      sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::float >= 0)`,
-      sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::float <  0)`
-      )
+    .from(tbls6Accidenthistory)
+    .innerJoin(
+      tbls1Facilities,
+      eq(tbls6Accidenthistory.facilityId, tbls1Facilities.facilityId)
     )
-    .innerJoin(tbls1Facilities, eq(
-      tbls6Accidenthistory.facilityId,
-      tbls1Facilities.facilityId
-    ))
-    .execute()
 
-  const features = rows.map(r => {
-    const lat = parseFloat(r.lat as any)
-    const lon = parseFloat(r.lon as any)
-    if (isNaN(lat) || isNaN(lon)) return null
-    return {
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [lon, lat] },
-      properties: {
-        id:              String(r.id),
-        EPAFacilityID  : String(r.EPAFacilityID), 
-        facilityId:      String(r.facilityId),
-        accidentDate:    r.date,
-        accidentTime:    r.time,
-        naicsCode:       r.naicsCode,
-        releaseDuration: r.releaseDuration,
-        reGas:           r.reGas,
-        reSpill:         r.reSpill,
-        reFire:          r.reFire,
-        reExplosion:     r.reExplosion,
-        initiatingEvent: r.initiatingEvent,
-        cfEquipment:     r.cfEquipment,
-        cfHumanError:    r.cfHumanError,
+  // ── conditions (apply once)
+  const conds = [
+    sql`${tbls1Facilities.validLatLongFlag} = 'Yes'`,
+    sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision) >= 0`,
+    sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision) <  0`,
+  ]
+
+  if (hasBBox) {
+    conds.push(
+      sql`(TRIM(${tbls1Facilities.facilityLongDecDegs})::double precision) BETWEEN ${minx} AND ${maxx}`,
+      sql`(TRIM(${tbls1Facilities.facilityLatDecDegs})::double precision) BETWEEN ${miny} AND ${maxy}`
+    )
+  }
+
+  // snapshot logic:
+  //   - range=latest → last 5 years
+  //   - submissionDate=YYYY-MM-DD → <= that date
+  //   - range=all or submissionDate=ALL → no date constraint
+  if (latestOnly) {
+    conds.push(sql`(${tbls6Accidenthistory.accidentDate}::date) >= (CURRENT_DATE - INTERVAL '5 years')`)
+  } else if (submissionDate && !cumulative) {
+    conds.push(sql`(${tbls6Accidenthistory.accidentDate}::date) <= to_date(${submissionDate}, 'YYYY-MM-DD')`)
+  }
+
+  const rows = await rowsQ.where(and(...conds)).execute()
+
+  const features = rows
+    .map(r => {
+      if (r.lat == null || r.lon == null || Number.isNaN(r.lat) || Number.isNaN(r.lon)) return null
+      return {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [r.lon, r.lat] },
+        properties: {
+          id:            String(r.id),
+          EPAFacilityID: String(r.EPAFacilityID),
+          name:          r.facilityName,
+          facilityId:    String(r.facilityId),
+          accidentDate:  r.date,
+          accidentTime:  r.time,
+          naicsCode:     r.naicsCode,
+        }
       }
-    }
-  }).filter(Boolean)
+    })
+    .filter(Boolean)
 
-  return { type: 'FeatureCollection', features }
+  const data = { type: 'FeatureCollection', features }
+  g.__accCache.set(cacheKey, { t: now, data })
+  setHeader(event, 'Cache-Control', 'public, max-age=300')
+  return data
 })
