@@ -144,17 +144,29 @@ function onFiltersUpdate(p: any) {
         </UsaAccordionItem>
         <UsaAccordionItem label="User Guide">
           <h3>Searching by Location</h3>
-          <p>Content to be provided by team...</p>
+          <p>
+            Use this section to find facilities based on where they are located. You can enter details like the street address, city, state, county, or ZIP code. This helps you see facilities near your home, workplace, or any area of interest. You can also choose to search for exact matches or broader areas.
+          </p>
           <h3>Searching by Facility</h3>
-          <p>Content to be provided by team...</p>
+          <p>
+            Here you can search for specific facilities by name, facility ID, or parent company. If you know the exact name or ID, use the exact match options to narrow down your search. This is useful if you want to find information about a particular chemical plant or company.
+          </p>
           <h3>Searching by Chemical (Advanced)</h3>
-          <p>Content to be provided by team...</p>
+          <p>
+            This advanced search lets you look for facilities based on the chemicals they handle or their industry codes (NAICS). You can enter chemical names or select chemical types to find facilities that use or store those substances. This helps you understand chemical risks in your community.
+          </p>
           <h3>Understanding Submissions</h3>
-          <p>Content to be provided by team...</p>
+          <p>
+            Facilities submit Risk Management Plans to the EPA to describe how they manage chemical hazards. This section helps you explore information about these submissions, including dates and program levels. It provides insight into how facilities comply with safety regulations.
+          </p>
           <h3>Understanding Accidents</h3>
-          <p>Content to be provided by team...</p>
+          <p>
+            This section allows you to filter facilities based on reported chemical accidents. You can specify date and time ranges to see recent incidents or historical data. This helps communities stay informed about chemical safety and accident history.
+          </p>
           <h3>Exporting and Downloading Data</h3>
-          <p>Content to be provided by team...</p>
+          <p>
+            After you run a search and get the results you want, you can download the data as an Excel file. This makes it easy to save, share, or analyze the information offline. Use the export button to get a file that matches your filter criteria.
+          </p>
         </UsaAccordionItem>
       </UsaAccordion>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
