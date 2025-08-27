@@ -142,6 +142,20 @@ function onFiltersUpdate(p: any) {
             Questions? Contact <a href="mailto:joel@drexel.edu" class="text-blue-600 underline">Joel Doe</a>.
           </p>
         </UsaAccordionItem>
+        <UsaAccordionItem label="User Guide">
+          <h3>Searching by Location</h3>
+          <p>Content to be provided by team...</p>
+          <h3>Searching by Facility</h3>
+          <p>Content to be provided by team...</p>
+          <h3>Searching by Chemical (Advanced)</h3>
+          <p>Content to be provided by team...</p>
+          <h3>Understanding Submissions</h3>
+          <p>Content to be provided by team...</p>
+          <h3>Understanding Accidents</h3>
+          <p>Content to be provided by team...</p>
+          <h3>Exporting and Downloading Data</h3>
+          <p>Content to be provided by team...</p>
+        </UsaAccordionItem>
       </UsaAccordion>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
     <section class="col-span-2">
