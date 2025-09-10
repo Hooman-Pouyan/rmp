@@ -131,7 +131,7 @@ function onFiltersUpdate(p: any) {
           </p>
 
           <p class="mb-2">
-            This information was previously available on EPA’s website from <time datetime="2024-03-01">March 2024</time> to <time datetime="2025-04-18">April 18, 2025</time>. The underlying data for this project were obtained by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a> — see their <a href="https://www.data-liberation-project.org/methodology" target="_blank" class="text-blue-600 underline">methodology</a>.
+            This information was previously available on EPA’s website from <time datetime="2024-03-01">March 2024</time> to <time datetime="2025-04-18">April 18, 2025</time>. The underlying data for this project were obtained by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a> — see their <a href="https://www.data-liberation-project.org/about" target="_blank" class="text-blue-600 underline">methodology</a>.
           </p>
 
           <p class="mb-2">
