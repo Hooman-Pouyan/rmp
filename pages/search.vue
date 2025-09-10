@@ -143,30 +143,63 @@ function onFiltersUpdate(p: any) {
           </p>
         </UsaAccordionItem>
         <UsaAccordionItem label="User Guide">
-          <h3>Searching by Location</h3>
-          <p>
-            Use this section to find facilities based on where they are located. You can enter details like the street address, city, state, county, or ZIP code. This helps you see facilities near your home, workplace, or any area of interest. You can also choose to search for exact matches or broader areas.
-          </p>
-          <h3>Searching by Facility</h3>
-          <p>
-            Here you can search for specific facilities by name, facility ID, or parent company. If you know the exact name or ID, use the exact match options to narrow down your search. This is useful if you want to find information about a particular chemical plant or company.
-          </p>
-          <h3>Searching by Chemical (Advanced)</h3>
-          <p>
-            This advanced search lets you look for facilities based on the chemicals they handle or their industry codes (NAICS). You can enter chemical names or select chemical types to find facilities that use or store those substances. This helps you understand chemical risks in your community.
-          </p>
-          <h3>Understanding Submissions</h3>
-          <p>
-            Facilities submit Risk Management Plans to the EPA to describe how they manage chemical hazards. This section helps you explore information about these submissions, including dates and program levels. It provides insight into how facilities comply with safety regulations.
-          </p>
-          <h3>Understanding Accidents</h3>
-          <p>
-            This section allows you to filter facilities based on reported chemical accidents. You can specify date and time ranges to see recent incidents or historical data. This helps communities stay informed about chemical safety and accident history.
-          </p>
-          <h3>Exporting and Downloading Data</h3>
-          <p>
-            After you run a search and get the results you want, you can download the data as an Excel file. This makes it easy to save, share, or analyze the information offline. Use the export button to get a file that matches your filter criteria.
-          </p>
+          <h3>What is the Risk Management Program (RMP)?</h3>
+  <p>
+    The Risk Management Program (RMP) was created under Section 112(r) of the Clean Air Act to prevent chemical disasters at facilities that use hazardous substances. It was enacted following the 1984 Bhopal disaster and requires regulated facilities to assess chemical risks, prevent incidents, and prepare emergency response procedures.
+  </p>
+  <p>
+    Facilities covered by this rule must submit updated plans to the EPA every five years, reporting any qualifying chemical incidents. These facilities include roughly 12,000 chemical plants across the U.S. — many of them located in fenceline communities disproportionately made up of low-income residents and people of color.
+  </p>
+
+  <h3>What makes a facility an “RMP facility”?</h3>
+  <p>
+    A facility is considered an RMP facility if it has a process that uses or stores specific hazardous chemicals in quantities above EPA’s threshold levels. Only those processes—not the entire facility—fall under the RMP rule.
+  </p>
+  <p>
+    Any facility that submitted an RMP to the EPA between 1990 and April 3, 2025 is listed on this map.
+  </p>
+
+  <h3>What information is included in an RMP submission?</h3>
+  <p>
+    Each facility submission contains information on chemical processes, hazard prevention, accidents, emergency response plans,
+     and the demographics of potentially impacted populations. See the <a href="https://www.data-liberation-project.org/about/"
+     class="text-blue-600 underline" target="_blank">Data Liberation Project’s explanation of “What’s in the database?”</a> for more.
+  </p>
+
+  <h3>How to use this map</h3>
+  <ul class="list-disc ml-6">
+    <li>Use the filters to search by facility name, location, chemical, NAICS code, or accident history.</li>
+    <li>Click “Search” to see matching results.</li>
+    <li>Zoom the map or enter your home/work address to see facilities in your area.</li>
+    <li>Click markers or table rows to view detailed info about that facility or accident.</li>
+    <li>Download filtered results via the Export button.</li>
+    <li>Use advanced filters to search by chemical or incidents within a date/time range.</li>
+  </ul>
+
+  <h3>What is a “recent accident”?</h3>
+  <p>
+    A “recent accident” is one reported in a facility’s most recent RMP submission (required every five years). These reports include incidents involving RMP-regulated chemicals that caused death, injury, property or environmental damage, or triggered evacuations or shelter-in-place orders. 
+  </p>
+  <p>
+    Note: Communities often refer to these as “incidents” because they are considered preventable, unlike accidents.
+  </p>
+
+  <h3>Limitations and Disclaimers</h3>
+  <ul class="list-disc ml-6">
+    <li>This data comes directly from EPA-submitted Risk Management Plans and may contain inaccuracies or outdated entries.</li>
+    <li>Facilities are only required to report certain types of incidents; not all chemical events are included.</li>
+    <li>The data on this map reflects submissions through April 3, 2025. Some incidents that occurred after that date may not yet be reported.</li>
+  </ul>
+
+  <h3>More Information</h3>
+  <ul class="list-disc ml-6">
+    <li>
+      Learn more from the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a>, which obtained and formatted this data for public access.
+    </li>
+    <li>
+      See the EPA’s original list of <a href="https://www.epa.gov/rmp/regulated-substances-risk-management-program" target="_blank" class="text-blue-600 underline">regulated substances</a> covered under the RMP rule.
+    </li>
+  </ul>
         </UsaAccordionItem>
       </UsaAccordion>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
