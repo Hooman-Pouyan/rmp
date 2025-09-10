@@ -199,8 +199,8 @@ async function initMap () {
     }
   })
 
-facIcons.title = 'Facilities (click a point for details)'
-accPoints.title = 'Accidents (click a point for details)'
+facIcons.title = 'Facilities (click a Blue Dot for details)'
+accPoints.title = 'Accidents (click a Red Dot for details)'
 
 
   // map.addMany([facIcons, subsBubbles, progSquares, accPoints, accHeat])
