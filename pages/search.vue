@@ -115,93 +115,186 @@ function onFiltersUpdate(p: any) {
 
 
 <template>
-  <!-- About this Map (collapsible) -->
-      <UsaAccordion bordered class="mt-4 mb-6">
-        <UsaAccordionItem label="About this map">
-          <p class="mb-2">
-            Following the release of the new <b>Safer Communities by Chemical Accident Prevention (SCCAP)</b> rule finalized in 2024, the U.S. Environmental Protection Agency (EPA) released a public data tool to help the public understand the hazards associated with the most highly hazardous chemical plants across the United States. This information is <b>no longer available on EPA’s website</b>.
-          </p>
+<!-- About this Map (collapsible) -->
+<UsaAccordion bordered class="mt-4 mb-6">
+    <UsaAccordionItem label="About this map">
+    <h3>What is the Risk Management Program (RMP)?</h3>
+    <p>
+      The Risk Management Program (RMP), administered by the U.S. Environmental Protection Agency (EPA) under Section
+      112(r) of the Clean Air Act, is intended to prevent disasters and releases at high-risk chemical facilities by establishing
+      response and prevention programs. It was enacted by Congress in 1990 following the 1984 pesticide gas disaster that
+      has since injured or killed over a half million people in Bhopal, India to prevent similar incidents from occurring in the
+      United States.
+    </p>
+    <p>
+      The EPA 2024 RMP rule requires that high-risk chemical facilities develop a plan to 1) assess the potential effects of a
+      chemical incident, 2) identify steps the facility is taking to prevent an incident, and 3) identify emergency response
+      procedures should an incident occur. Facilities have to submit updated RMP plans to the EPA at least every five years
+      and report any incidents that have occurred since their last plan.
+    </p>
+    <p>
+      The RMP rule regulates around 12,000 high-risk facilities that manufacture, use and stockpile highly hazardous
+      chemicals such as those used in oil refineries, chemical plants, paper mills, food processing, water treatment,
+      agriculture (pesticides, fertilizers and the intermediary chemicals used to make the final product), plastics and other
+      products. Fenceline communities neighboring these facilities are disproportionately Black, Latino and low-income and
+      are impacted not only by chemical emissions from these facilities, but also many non-chemical stressors (such as
+      socioeconomic factors) and ongoing chemical disasters from these facilities.
+    </p>
+    <p>For more information, see “Where does the database come from?” by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a>.</p>
 
-          <p class="mb-2">
-            This map was developed by The <strong>Environmental Collaboratory</strong> at Drexel University, in collaboration with the Environmental Justice Health Alliance for Chemical Policy Reform (EJHA), so that impacted communities <em>(residents, emergency responders, and local governments)</em> can still access facility information in their backyards. While the information displayed on this site was formatted by Drexel, the underlying data come from the U.S. EPA (see below), and neither Drexel nor EJHA make any claims about the accuracy or currency of the data.
-          </p>
+    <h3>Which facilities or processes are regulated under the RMP rule?</h3>
+    <p>
+      If a facility includes a process unit that makes, uses or stores a certain amount of a regulated substance/chemical (see
+      <a href="https://www.epa.gov/rmp/list-regulated-substances-under-risk-management-program" target="_blank" class="text-blue-600 underline">here</a>), that process is subject to complying with the RMP rule.
+      To be clear, the entire facility is not regulated under the RMP, only the processes that meet the chemical and quantity
+      thresholds.
+    </p>
 
-          <p class="mb-2">
-            The information used on this map only includes publicly available and non‑confidential portions of Risk Management Plans submitted by chemical companies to the EPA as part of compliance with the Risk Management Program (RMP) under the Clean Air Act.
-          </p>
+    <h3>What does it mean to be an RMP facility for the purposes of this tool?</h3>
+    <p>
+      A facility is listed as an RMP facility on this map if it submitted a Risk Management Plan to the EPA before April 3,
+      2025 in compliance with the RMP rule since the RMP was established in 1990.
+    </p>
 
-          <p class="mb-2">
-            This information was previously available on EPA’s website from <time datetime="2024-03-01">March 2024</time> to <time datetime="2025-04-18">April 18, 2025</time>. The underlying data for this project were obtained by the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a> — see their <a href="https://www.data-liberation-project.org/about" target="_blank" class="text-blue-600 underline">methodology</a>.
-          </p>
+    <h3>What is considered a “recent accident” for the purpose of this search tool and map?</h3>
+    <p>
+      <strong>Note:</strong> Communities and chemical safety advocates refer to these as “incidents” because “accidents” cannot be
+      prevented, and chemical disaster incidents are preventable.
+    </p>
+    <p>
+      A “recent accident” is an incident such as an explosion, leak, or other chemical release that was reported by a facility
+      on their last RMP submission to the EPA. Facilities are required by the EPA to submit an updated RMP at least every
+      five years, starting the date when a facility begins to use, make or store a regulated chemical above a threshold
+      amount. Due to the periodic nature of RMP submissions, there is a delay in reporting incidents to EPA and therefore
+      incident data for the past five years is incomplete.
+    </p>
+    <p>
+      Facilities are only required to report an incident to the EPA (i.e. “reportable incident”) if it involved one or more RMP
+      regulated chemicals that were emitted at levels above the threshold quantity. The incident must have also involved
+      deaths, injuries, property damage or resulted in environmental damage, evacuation or sheltering in place. <br />
+      <em>Note: The data underlying this map only contains records through April 3, 2025.</em>
+    </p>
+    <p>
+      An exception for the requirement to submit an RMP every five years is if a facility makes substantial changes to an RMP
+      covered process. If substantial changes are made to an RMP covered process within the five-year compliance period,
+      a facility can submit an updated RMP more frequently.
+    </p>
+    <ul class="list-disc ml-6">
+      <li>Facility 1: A facility may not have contained a chemical at the amount that triggers compliance with the RMP until March 1, 2008. It would be required to file an RMP five years on March 1 after that, in 2013, 2018, 2023 and 2028. The most recent submission would include incidents from March 2, 2018 through March 1, 2023.</li>
+      <li>Facility 2: A different facility may have been required to comply with the rule as of April 30, 2000, which would mean they were required to submit their RMP plan to EPA at least every five years by April 30th after that, in 2005, 2010, 2015, 2020, 2025. The most recent submission would include incidents from May 1, 2015–April 30, 2020.</li>
+    </ul>
 
-          <p class="mb-2">
-            Since the RMP rule requires that facilities update their Risk Management Plans every five years, the data included here represent submissions received by <time datetime="2025-07-06">July 6, 2025</time>, and may not include incidents that occurred within the last five years.
-          </p>
+    <h3>What information is included on a facility’s RMP submission?</h3>
+    <p>
+      The information in this section is drawn from “What’s in the database?” by the Data Liberation Project, an organization
+      that requests RMP data from the federal government periodically and posts it for public access.
+    </p>
+    <p>
+      The best way to understand what’s in the database is to read the EPA’s user guide for facilities submitting RMPs. It walks
+      through each section, field, and value, and will give you a sense of what the data-entry process looks like.
+    </p>
+    <p>The database is oriented around the concept of the RMP submission. Here’s a broad overview of what an RMP submission contains, going section by section:</p>
 
-          <p>
-            Questions? Contact <a href="mailto:joel@drexel.edu" class="text-blue-600 underline">Joel Doe</a>.
-          </p>
-        </UsaAccordionItem>
-        <UsaAccordionItem label="User Guide">
-          <h3>What is the Risk Management Program (RMP)?</h3>
-  <p>
-    The Risk Management Program (RMP) was created under Section 112(r) of the Clean Air Act to prevent chemical disasters at facilities that use hazardous substances. It was enacted following the 1984 Bhopal disaster and requires regulated facilities to assess chemical risks, prevent incidents, and prepare emergency response procedures.
-  </p>
-  <p>
-    Facilities covered by this rule must submit updated plans to the EPA every five years, reporting any qualifying chemical incidents. These facilities include roughly 12,000 chemical plants across the U.S. — many of them located in fenceline communities disproportionately made up of low-income residents and people of color.
-  </p>
+    <ul class="list-disc ml-6">
+      <li>
+        <strong>Section 1. Registration:</strong> General information about the facility and the submission itself, including the type of submission,
+        facility name, parent company names, EPA Facility ID, other EPA identifiers, DUNS numbers, facility address,
+        geocoordinates, person responsible for RMP implementation, emergency contact, Local Emergency Planning Committee,
+        number of full-time employees, applicability of other safety rules, last safety inspection, use of “predictive filing,” and a list of covered “processes.”
+      </li>
+      <li>
+        <strong>Section 2. Toxics: Worst-Case:</strong> Facility’s assessment of the worst-case release scenario for toxic substances in Programs 1–3.
+        Includes chemical name, state (gas/liquid), scenario model, release rate, and modeling factors. Much of the other info is redacted by EPA (e.g., quantity released, population exposed).
+      </li>
+      <li>
+        <strong>Section 3. Toxics: Alternative Release:</strong> Alternative, more likely toxic scenarios that could still affect the public. One required per regulated substance above threshold. Also heavily redacted.
+      </li>
+      <li>
+        <strong>Section 4. Flammables: Worst-Case:</strong> Same as Section 2 but for flammable substances.
+      </li>
+      <li>
+        <strong>Section 5. Flammables: Alternative Release:</strong> Same as Section 3 but for flammable substances.
+      </li>
+      <li>
+        <strong>Section 6. Five-Year Accident History:</strong> All accidental releases from covered processes in the past 5 years involving deaths,
+        injuries, significant property damage, or offsite impact. Includes date/time, chemicals involved, accident type (fire/explosion), release duration, cause, on/offsite impacts, and corrective actions.
+      </li>
+      <li>
+        <strong>Section 7. Prevention Program: Program Level 3:</strong> Includes NAICS code, chemicals, last safety info review date, latest process hazard analysis (PHA), major hazards (e.g., explosion, overfilling), mitigation systems, training programs, audits, incident investigations, etc.
+      </li>
+      <li>
+        <strong>Section 8. Prevention Program: Program Level 2:</strong> Similar to Section 7 but for Program 2 processes.
+      </li>
+      <li>
+        <strong>Section 9. Emergency Response:</strong> Facilities indicate if they have an ER plan, when it was last updated, if employees are trained, and provide contact info for their coordinating local agency. If a facility does not have employees respond to emergencies, they may skip this.
+      </li>
+    </ul>
 
-  <h3>What makes a facility an “RMP facility”?</h3>
-  <p>
-    A facility is considered an RMP facility if it has a process that uses or stores specific hazardous chemicals in quantities above EPA’s threshold levels. Only those processes—not the entire facility—fall under the RMP rule.
-  </p>
-  <p>
-    Any facility that submitted an RMP to the EPA between 1990 and April 3, 2025 is listed on this map.
-  </p>
+    <h3>Executive Summary</h3>
+    <p>
+      This is a single, free-text field. As the submission guide explains: “The Executive Summary must include a brief description
+      of your facility's risk management program. You determine the length; it may be as short as two or three pages or, if you have
+      many processes, it may need to be longer. You should view the Executive Summary as an opportunity to communicate in
+      your own words the nature of the risks posed by your facility to your community and to explain what you have done to minimize
+      those risks.”
+    </p>
 
-  <h3>What information is included in an RMP submission?</h3>
-  <p>
-    Each facility submission contains information on chemical processes, hazard prevention, accidents, emergency response plans,
-     and the demographics of potentially impacted populations. See the <a href="https://www.data-liberation-project.org/about/"
-     class="text-blue-600 underline" target="_blank">Data Liberation Project’s explanation of “What’s in the database?”</a> for more.
-  </p>
+    <h3>In the advanced search feature – What does it mean to search by a specific chemical? Are the results comprehensive?</h3>
+    <p><strong>No, the results are NOT comprehensive.</strong></p>
+    <p>
+      Just because a facility doesn’t show up when you search by chemical does not mean that the facility does not use, make, or store
+      that chemical. It just means they are not regulated under the RMP for that chemical. The facility could still use or store the
+      chemical at a lower amount than the RMP threshold.
+    </p>
+    <p>
+      When viewing a facility’s details, the chemicals listed are only those regulated under the RMP. Not all chemicals are regulated,
+      and even regulated ones might not appear if the facility doesn’t exceed the reporting threshold.
+    </p>
 
-  <h3>How to use this map</h3>
-  <ul class="list-disc ml-6">
-    <li>Use the filters to search by facility name, location, chemical, NAICS code, or accident history.</li>
-    <li>Click “Search” to see matching results.</li>
-    <li>Zoom the map or enter your home/work address to see facilities in your area.</li>
-    <li>Click markers or table rows to view detailed info about that facility or accident.</li>
-    <li>Download filtered results via the Export button.</li>
-    <li>Use advanced filters to search by chemical or incidents within a date/time range.</li>
-  </ul>
+    <h3>Additional Resources</h3>
+    <ul class="list-disc ml-6">
+      <li><a href="https://www.epa.gov/rmp/list-regulated-substances-under-risk-management-program" target="_blank" class="text-blue-600 underline">EPA’s List of Chemicals and Threshold Quantities</a></li>
+      <li><a href="https://docs.google.com/document/d/1jrLXtv0knnACiPXJ1ZRFXR1GaPWCHJWWjin4rsthFbQ/edit?tab=t.0" target="_blank" class="text-blue-600 underline">Data Liberation Project: EPA RMP Database Documentation</a></li>
+      <li><a href="https://preventchemicaldisasters.org/chemical-incident-tracker/incidents" target="_blank" class="text-blue-600 underline">Coalition to Prevent Chemical Disasters Incident Tracker</a></li>
+      <li><a href="https://preventchemicaldisasters.org/" target="_blank" class="text-blue-600 underline">Coalition to Prevent Chemical Disasters Website</a></li>
+      <li><a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project Website</a></li>
+    </ul>
+      <p class="mt-4">
+      If you’d like to learn more about the context, background, and methodologies used to collect, organize, and publish this data,
+      please review the original RMP eSubmit User Manual and additional links provided by the Data Liberation Project. These
+      contain deeper insights into the federal data submission process and data transparency efforts.
+    </p>
+  </UsaAccordionItem>
+  <UsaAccordionItem label="User Guide">
+    <h3>How to use this search tool & map</h3>
+    <p>
+      For many years, residents and workers have called for an accessible way to search for RMP facility information online.
+      Previously, there were few options to see these data. Accessing even basic information about facilities located near
+      your home or job was extremely onerous and outdated. In February 2024, EPA finalized much needed updates to the
+      RMP in the “Safer Communities by Chemical Accident Prevention” rule and at the same time, released an RMP search
+      tool that allowed users to easily search for and find information about RMP facilities in their states and communities.
+      Then in April 2025, EPA took that search tool offline after the chemical industry called for it to be taken down. In the
+      absence of EPA’s tool, Drexel University developed this search tool and map to ensure that communities and facility
+      workers still have access to this information.
+    </p>
+    <p>Some ways to use this tool include:</p>
+    <ul class="list-disc ml-6">
+      <li>Typing in your home or work address and/or zooming into your area on the map to see what facilities are in your area to better inform and protect yourself and your family in the event of a chemical disaster.</li>
+      
+      <li>Searching by your city or county name to see what facilities are in your area and what kinds of hazards they pose, and reaching out to your local government or Local Emergency Planning Committee to ask what emergency prevention or response plans are in place and what you should do in a disaster.</li>
+      <li>Searching by a specific name of a facility that you work in or live near and have concerns about.</li>
+      <li>Searching (in the “advanced search”) by chemical name (see “In advanced search – What does it mean to search by a specific chemical? Are the results that come up comprehensive?“ below for details).</li>
+      <li>Looking at the map to see the frequency of chemical disasters in a given area and clicking on specific incidents to find more information about them.</li>
+    </ul>
 
-  <h3>What is a “recent accident”?</h3>
-  <p>
-    A “recent accident” is one reported in a facility’s most recent RMP submission (required every five years). These reports include incidents involving RMP-regulated chemicals that caused death, injury, property or environmental damage, or triggered evacuations or shelter-in-place orders. 
-  </p>
-  <p>
-    Note: Communities often refer to these as “incidents” because they are considered preventable, unlike accidents.
-  </p>
-
-  <h3>Limitations and Disclaimers</h3>
-  <ul class="list-disc ml-6">
-    <li>This data comes directly from EPA-submitted Risk Management Plans and may contain inaccuracies or outdated entries.</li>
-    <li>Facilities are only required to report certain types of incidents; not all chemical events are included.</li>
-    <li>The data on this map reflects submissions through April 3, 2025. Some incidents that occurred after that date may not yet be reported.</li>
-  </ul>
-
-  <h3>More Information</h3>
-  <ul class="list-disc ml-6">
-    <li>
-      Learn more from the <a href="https://www.data-liberation-project.org/" target="_blank" class="text-blue-600 underline">Data Liberation Project</a>, which obtained and formatted this data for public access.
-    </li>
-    <li>
-      See the EPA’s original list of <a href="https://www.epa.gov/rmp/regulated-substances-risk-management-program" target="_blank" class="text-blue-600 underline">regulated substances</a> covered under the RMP rule.
-    </li>
-  </ul>
-        </UsaAccordionItem>
-      </UsaAccordion>
+    <h3>How does this tool differ from EPA’s former tool?</h3>
+    <p>
+      This tool includes access to the same information contained in EPA’s previous tool. You can use this tool in the same
+      way you would have used EPA’s, however this tool will not be updated as frequently. Chemical facilities can revise or
+      update their RMP plans at any time. EPA’s tool was updated daily, but this one will be updated annually.
+    </p>
+  </UsaAccordionItem>
+</UsaAccordion>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
     <section class="col-span-2">
       <header class="usa-card__header !px-0">
