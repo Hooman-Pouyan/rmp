@@ -156,100 +156,30 @@ function onFiltersUpdate(p: any) {
       2025 in compliance with the RMP rule since the RMP was established in 1990.
     </p>
 
-    <h3>What is considered a “recent accident” for the purpose of this search tool and map?</h3>
-    <p>
-      <strong>Note:</strong> Communities and chemical safety advocates refer to these as “incidents” because “accidents” cannot be
-      prevented, and chemical disaster incidents are preventable.
-    </p>
-    <p>
-      A “recent accident” is an incident such as an explosion, leak, or other chemical release that was reported by a facility
-      on their last RMP submission to the EPA. Facilities are required by the EPA to submit an updated RMP at least every
-      five years, starting the date when a facility begins to use, make or store a regulated chemical above a threshold
-      amount. Due to the periodic nature of RMP submissions, there is a delay in reporting incidents to EPA and therefore
-      incident data for the past five years is incomplete.
-    </p>
-    <p>
-      Facilities are only required to report an incident to the EPA (i.e. “reportable incident”) if it involved one or more RMP
-      regulated chemicals that were emitted at levels above the threshold quantity. The incident must have also involved
-      deaths, injuries, property damage or resulted in environmental damage, evacuation or sheltering in place. <br />
-      <em>Note: The data underlying this map only contains records through April 3, 2025.</em>
-    </p>
-    <p>
-      An exception for the requirement to submit an RMP every five years is if a facility makes substantial changes to an RMP
-      covered process. If substantial changes are made to an RMP covered process within the five-year compliance period,
-      a facility can submit an updated RMP more frequently.
-    </p>
-    <ul class="list-disc ml-6">
-      <li>Facility 1: A facility may not have contained a chemical at the amount that triggers compliance with the RMP until March 1, 2008. It would be required to file an RMP five years on March 1 after that, in 2013, 2018, 2023 and 2028. The most recent submission would include incidents from March 2, 2018 through March 1, 2023.</li>
-      <li>Facility 2: A different facility may have been required to comply with the rule as of April 30, 2000, which would mean they were required to submit their RMP plan to EPA at least every five years by April 30th after that, in 2005, 2010, 2015, 2020, 2025. The most recent submission would include incidents from May 1, 2015–April 30, 2020.</li>
-    </ul>
 
+    <p>The information in this section is drawn from “What’s in the database?” by the Data Liberation Project, an organization that requests RMP data from the federal government periodically and posts it for public access.</p>
+    <p>The best way to understand what’s in the database is to read the EPA’s user guide for facilities submitting RMPs. It walks through each section, field, and value, and will give you a sense of what the data-entry process looks like. The database is oriented around the concept of the RMP submission. Here’s a broad overview of what an RMP submission contains, going section by section:</p>
     <h3>What information is included on a facility’s RMP submission?</h3>
-    <p>
-      The information in this section is drawn from “What’s in the database?” by the Data Liberation Project, an organization
-      that requests RMP data from the federal government periodically and posts it for public access.
-    </p>
-    <p>
-      The best way to understand what’s in the database is to read the EPA’s user guide for facilities submitting RMPs. It walks
-      through each section, field, and value, and will give you a sense of what the data-entry process looks like.
-    </p>
-    <p>The database is oriented around the concept of the RMP submission. Here’s a broad overview of what an RMP submission contains, going section by section:</p>
+    <p><strong>Section 1. Registration:</strong> This section provides general information about the facility and the submission itself, including the type of submission, facility name, parent company names (majority owner or two largest owners),  EPA Facility ID, other EPA identifiers, DUNS numbers, facility address, facility geocoordinates, person responsible for RMP implementation, emergency contact,  Local Emergency Planning Committee, number of full-time equivalent employees on site, applicability of other federal safety rules, last safety inspection date/inspector, whether using “predictive filing,” and a list of relevant “processes” (see definition below).</p>
 
-    <ul class="list-disc ml-6">
-      <li>
-        <strong>Section 1. Registration:</strong> General information about the facility and the submission itself, including the type of submission,
-        facility name, parent company names, EPA Facility ID, other EPA identifiers, DUNS numbers, facility address,
-        geocoordinates, person responsible for RMP implementation, emergency contact, Local Emergency Planning Committee,
-        number of full-time employees, applicability of other safety rules, last safety inspection, use of “predictive filing,” and a list of covered “processes.”
-      </li>
-      <li>
-        <strong>Section 2. Toxics: Worst-Case:</strong> Facility’s assessment of the worst-case release scenario for toxic substances in Programs 1–3.
-        Includes chemical name, state (gas/liquid), scenario model, release rate, and modeling factors. Much of the other info is redacted by EPA (e.g., quantity released, population exposed).
-      </li>
-      <li>
-        <strong>Section 3. Toxics: Alternative Release:</strong> Alternative, more likely toxic scenarios that could still affect the public. One required per regulated substance above threshold. Also heavily redacted.
-      </li>
-      <li>
-        <strong>Section 4. Flammables: Worst-Case:</strong> Same as Section 2 but for flammable substances.
-      </li>
-      <li>
-        <strong>Section 5. Flammables: Alternative Release:</strong> Same as Section 3 but for flammable substances.
-      </li>
-      <li>
-        <strong>Section 6. Five-Year Accident History:</strong> All accidental releases from covered processes in the past 5 years involving deaths,
-        injuries, significant property damage, or offsite impact. Includes date/time, chemicals involved, accident type (fire/explosion), release duration, cause, on/offsite impacts, and corrective actions.
-      </li>
-      <li>
-        <strong>Section 7. Prevention Program: Program Level 3:</strong> Includes NAICS code, chemicals, last safety info review date, latest process hazard analysis (PHA), major hazards (e.g., explosion, overfilling), mitigation systems, training programs, audits, incident investigations, etc.
-      </li>
-      <li>
-        <strong>Section 8. Prevention Program: Program Level 2:</strong> Similar to Section 7 but for Program 2 processes.
-      </li>
-      <li>
-        <strong>Section 9. Emergency Response:</strong> Facilities indicate if they have an ER plan, when it was last updated, if employees are trained, and provide contact info for their coordinating local agency. If a facility does not have employees respond to emergencies, they may skip this.
-      </li>
-    </ul>
+    <p><strong>Section 2: Toxics: Worst-Case:</strong> This section contains the facility’s assessment of the “worst-case release scenario” for Program 1 processes (see “program” definition below), another for toxic substances in Programs 2 and 3, another for flammable substances in Programs 2 and 3, and potentially additional scenarios depending on the range of potential “public receptors” (see the user guide and/or statute for details). This section focuses on toxic substances. For each scenario, facilities list the process, chemical, chemical state (e.g., gas, liquid), scenario model used, release rate, and a handful of scenario-modeling factors. The EPA has redacted or fully zeroed-out much of the other information in this section, however, including: type of scenario, quantity of chemical released, release duration, distance to “endpoint,” residential population within distance to endpoint, and “public receptors” (e.g., schools, homes, hospitals) and “environmental receptors” (e.g., state parks, wildlife sanctuaries) within distance to endpoint.</p>
+
+    <p><strong>Section 3: Toxics: Alternative Release:</strong> Alternative release scenarios are those more likely to occur than the “worst-case” scenarios but could still affect the public. Facilities must “present one alternative release scenario for each regulated toxic substance held above the threshold quantity in a Program 2 or 3 process [and] one alternative release scenario to represent all flammable substances held above the threshold quantity in a Program 2 or 3 process.” This section focuses on toxic substances. The information provided by facilities (and EPA redactions) are similar to those in the section above. Also similarly, they are heavily redacted.</p>
+
+    <p><strong>Section 4: Flammables: Worst-Case:</strong> Similar to Section 2, but for flammable substances, with slight differences. Also similarly, they are heavily redacted.</p>
+
+    <p><strong>Section 5: Flammables: Alternative Release:</strong> Similar to Section 3, but for flammable substances, with slight differences. Also similarly, they are heavily redacted.</p>
+
+    <p><strong>Section 6: Five-Year Accident History:</strong> The accident histories listed in the RMPs must include ”all accidental releases from covered processes that resulted in deaths, injuries, or significant property damage on site, or known offsite deaths, injuries, evacuations, sheltering in place, property damage, or environmental damage.” For each such accident in the five years before the RMP submission, this section includes: the date and time the accident began, the duration of the release, the NAICS industry code of the process involved, the chemicals involved, the type of accident (explosion, fire, etc.), source of release, weather conditions, initiating event type, contributing factors, on-site impacts (deaths, injuries, property damage), known offsite impacts, whether offsite responders were notified, changes implemented as a result of the accident, and whether the facility is withholding any aspect as confidential business information.</p>
+
+    <p><strong>Section 7: Prevention Program: Program Level 3:</strong> For each Program 3 process (see “program” definition below), and, in some cases, individual units of each process, facilities must provide a variety of information about the steps they’ve taken to prevent accidents, including: the NAICS industrial code for the process, the chemicals involved, the date the safety information was last reviewed, the date and technique of the last “Process Hazard Analysis,” the major hazards identified (e.g., explosion, corrosion, overfilling, earthquakes, hurricanes), process controls in place (e.g., relief valves, keyed bypass systems, automatic shutoffs), mitigation systems in use (e.g., sprinkler systems, blast walls), monitoring systems in use, training programs provided, recent maintenance, recent audits, recent incident investigations, and other compliance-related information.</p>
+
+    <p><strong>Section 8: Prevention Program: Program Level 2:</strong> Similar to Section 7, but for Program 2 processes, with slight differences.</p>
+
+    <p><strong>Section 9: Emergency Response:</strong> In this section, facilities provide information about their emergency response plan, mostly in the form of yes/no checkboxes, with the exception of the dates of the most recent emergency response update and training for employees, as well as the name and phone number of the “local agency with which your facility's ER plan or response actions are coordinated.” Facilities that (in addition to meeting other criteria) do not have their employees respond to emergencies are not required to complete this section.</p>
 
     <h3>Executive Summary</h3>
-    <p>
-      This is a single, free-text field. As the submission guide explains: “The Executive Summary must include a brief description
-      of your facility's risk management program. You determine the length; it may be as short as two or three pages or, if you have
-      many processes, it may need to be longer. You should view the Executive Summary as an opportunity to communicate in
-      your own words the nature of the risks posed by your facility to your community and to explain what you have done to minimize
-      those risks.”
-    </p>
-
-    <h3>In the advanced search feature – What does it mean to search by a specific chemical? Are the results comprehensive?</h3>
-    <p><strong>No, the results are NOT comprehensive.</strong></p>
-    <p>
-      Just because a facility doesn’t show up when you search by chemical does not mean that the facility does not use, make, or store
-      that chemical. It just means they are not regulated under the RMP for that chemical. The facility could still use or store the
-      chemical at a lower amount than the RMP threshold.
-    </p>
-    <p>
-      When viewing a facility’s details, the chemicals listed are only those regulated under the RMP. Not all chemicals are regulated,
-      and even regulated ones might not appear if the facility doesn’t exceed the reporting threshold.
-    </p>
+    <p>This is a single, free-text field. As the submission guide explains: “The Executive Summary must include a brief description of your facility's risk management program. You determine the length; it may be as short as two or three pages or, if you have many processes, it may need to be longer. You should view the Executive Summary as an opportunity to communicate in your own words the nature of the risks posed by your facility to your community and to explain what you have done to minimize those risks.“</p>
 
     <h3>Additional Resources</h3>
     <ul class="list-disc ml-6">
@@ -280,7 +210,6 @@ function onFiltersUpdate(p: any) {
     <p>Some ways to use this tool include:</p>
     <ul class="list-disc ml-6">
       <li>Typing in your home or work address and/or zooming into your area on the map to see what facilities are in your area to better inform and protect yourself and your family in the event of a chemical disaster.</li>
-      
       <li>Searching by your city or county name to see what facilities are in your area and what kinds of hazards they pose, and reaching out to your local government or Local Emergency Planning Committee to ask what emergency prevention or response plans are in place and what you should do in a disaster.</li>
       <li>Searching by a specific name of a facility that you work in or live near and have concerns about.</li>
       <li>Searching (in the “advanced search”) by chemical name (see “In advanced search – What does it mean to search by a specific chemical? Are the results that come up comprehensive?“ below for details).</li>
@@ -293,6 +222,37 @@ function onFiltersUpdate(p: any) {
       way you would have used EPA’s, however this tool will not be updated as frequently. Chemical facilities can revise or
       update their RMP plans at any time. EPA’s tool was updated daily, but this one will be updated annually.
     </p>
+
+    <h3>What is considered a “recent accident” for the purpose of this search tool and map?</h3>
+    <p><em>(Note: Communities and chemical safety advocates refer to these as “incidents” because “accidents” cannot be prevented, and chemical disaster incidents are preventable.)</em></p>
+
+    <p>A “recent accident” is an incident such as an explosion, leak, or other chemical release that was reported by a facility on their last RMP submission to the EPA. Facilities are required by the EPA to submit an updated RMP at least every five years, starting the date when a facility begins to use, make or store a regulated chemical above a threshold amount. Due to the periodic nature of RMP submissions, there is a delay in reporting incidents to EPA and therefore incident data for the past five years is incomplete.</p>
+
+    <p>Facilities are only required to report an incident to the EPA (i.e. “reportable incident”) if it involved one or more RMP regulated chemicals that were emitted at levels above the threshold quantity (noted here). The incident must have also involved deaths, injuries, property damage or resulted in environmental damage, evacuation or sheltering in place. <strong>*Note: The data underlying this map only contains records through April 3, 2025.</strong></p>
+
+    <p>An exception for the requirement to submit an RMP every five years is if a facility makes substantial changes to an RMP covered process. If substantial changes are made to an RMP covered process within the five-year compliance period, a facility can submit an updated RMP more frequently.</p>
+
+    <h4 class="mt-4 font-semibold">For example:</h4>
+
+    <p><strong>Facility 1:</strong> A facility may not have contained a chemical at the amount that triggers compliance with the RMP until March 1, 2008. It would be required to file an RMP five years on March 1 after that, in 2013, 2018, 2023 and 2028. The data underlying this map only contains records through April 3, 2025. So if the facility complied with the RMP and reported on time, the most recent submission would include incidents from March 2, 2018 through March 1, 2023.</p>
+
+    <p><strong>Facility 2:</strong> A different facility may have been required to comply with the rule as of April 30, 2000, which would mean they were required to submit their RMP plan to EPA at least every five years by April 30th after that, in 2005, 2010, 2015, 2020, 2025. The most recent submission on this map would include incidents from May 1, 2015–April 30, 2020 since the data underlying this map only contains records through April 3, 2025.</p>
+
+    <p><a href="https://www.whatsinmyair.org/data-liberation-project/rmp/what-counts-as-an-accident" target="_blank" rel="noopener noreferrer">What makes an incident reportable can be found here.</a><br>
+    You can also read <a href="https://www.whatsinmyair.org/data-liberation-project/rmp/what-counts-as-an-accident" target="_blank" rel="noopener noreferrer">“What counts as an accident?” by Data Liberation Project</a> for more information.</p>
+
+  <h3>In the advanced search feature – What does it mean to search by a specific chemical? Are the results comprehensive?</h3>
+    <p><strong>No, the results are NOT comprehensive.</strong></p>
+    <p>
+      Just because a facility doesn’t show up when you search by chemical does not mean that the facility does not use, make, or store
+      that chemical. It just means they are not regulated under the RMP for that chemical. The facility could still use or store the
+      chemical at a lower amount than the RMP threshold.
+    </p>
+    <p>
+      When viewing a facility’s details, the chemicals listed are only those regulated under the RMP. Not all chemicals are regulated,
+      and even regulated ones might not appear if the facility doesn’t exceed the reporting threshold.
+    </p>
+
   </UsaAccordionItem>
 </UsaAccordion>
   <div class="usa-card usa-card--bordered grid grid-cols-6 gap-4 items-start w-full h-fit">
